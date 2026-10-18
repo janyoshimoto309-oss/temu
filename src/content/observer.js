@@ -19,6 +19,8 @@ TZ.observer = {
         for (const node of m.addedNodes) {
           if (node.nodeType !== 1) continue;
           if (node.id === TZ.HOST_ID || (node.closest && node.closest("#" + TZ.HOST_ID))) continue;
+          const tag = node.tagName;
+          if (tag === "SCRIPT" || tag === "STYLE" || tag === "LINK" || tag === "META") continue;
           relevant = true;
           break;
         }
@@ -45,6 +47,7 @@ TZ.observer = {
 
   onUrlChange: function () {
     this.url = location.href;
+    if (TZ.cards && TZ.cards.clearCache) TZ.cards.clearCache();
     TZ.pageScope.refresh();
     this.schedule();
     if (TZ.panel && TZ.panel.updateStatus) TZ.panel.updateStatus();

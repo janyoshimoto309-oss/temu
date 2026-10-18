@@ -130,14 +130,31 @@ TZ.composedParent = function (el) {
   return null;
 };
 
+TZ._shadowMemo = null;
+
+TZ.beginScan = function () {
+  TZ._shadowMemo = new WeakMap();
+};
+
+TZ.endScan = function () {
+  TZ._shadowMemo = null;
+};
+
 TZ.openShadow = function (el) {
   if (!el || el.nodeType !== 1) return null;
+  if (TZ._shadowMemo && TZ._shadowMemo.has(el)) return TZ._shadowMemo.get(el);
+  let sr = null;
   try {
     if (typeof chrome !== "undefined" && chrome.dom && chrome.dom.openOrClosedShadowRoot) {
-      return chrome.dom.openOrClosedShadowRoot(el) || el.shadowRoot || null;
+      sr = chrome.dom.openOrClosedShadowRoot(el) || el.shadowRoot || null;
+    } else {
+      sr = el.shadowRoot || null;
     }
-  } catch (err) {}
-  return el.shadowRoot || null;
+  } catch (err) {
+    sr = el.shadowRoot || null;
+  }
+  if (TZ._shadowMemo) TZ._shadowMemo.set(el, sr);
+  return sr;
 };
 
 TZ.deepInnerText = function (el) {
@@ -284,7 +301,8 @@ TZ.innerTextSkip = function (root, skipEl) {
 
 TZ.parseCard = function (card, zhiliaoEl) {
   const cardText = TZ.deepInnerText(card);
-  const zText = zhiliaoEl ? TZ.deepInnerText(zhiliaoEl) : "";
+  const zInside = !!(zhiliaoEl && card && (zhiliaoEl === card || (card.contains && card.contains(zhiliaoEl))));
+  const zText = zhiliaoEl && !zInside ? TZ.deepInnerText(zhiliaoEl) : "";
   const zhiliao = TZ.parseZhiliaoText(zText && (zText.includes("上架时间") || zText.includes("知了数据")) ? zText : cardText);
   if (!zhiliao.listedRaw) {
     const listed = TZ.extractListedRaw(cardText);

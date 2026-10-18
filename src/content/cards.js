@@ -1,8 +1,26 @@
 var TZ = TZ || {};
 
 TZ.cards = {
+  _parseCache: new WeakMap(),
+  _cardFromCache: new WeakMap(),
+
+  clearCache: function () {
+    this._parseCache = new WeakMap();
+    this._cardFromCache = new WeakMap();
+  },
+
   _isOurHost: function (el) {
-    return !!(el && (el.id === TZ.HOST_ID || el.closest && el.closest("#" + TZ.HOST_ID)));
+    return !!(el && (el.id === TZ.HOST_ID || (el.closest && el.closest("#" + TZ.HOST_ID))));
+  },
+
+  _lightText: function (el) {
+    if (!el) return "";
+    return el.textContent || "";
+  },
+
+  _lightFp: function (card) {
+    if (!card) return "";
+    return String(card.childElementCount) + ":" + String((card.textContent || "").length);
   },
 
   _collectTextHits: function (root, hits) {
@@ -54,6 +72,18 @@ TZ.cards = {
 
   findCardFrom: function (start) {
     if (!start || this._isOurHost(start)) return null;
+    const cacheKey = start.nodeType === Node.TEXT_NODE ? start.parentElement : start;
+    if (cacheKey && this._cardFromCache.has(cacheKey)) {
+      const hit = this._cardFromCache.get(cacheKey);
+      if (hit && document.body.contains(hit)) return hit;
+      if (hit == null) return null;
+    }
+    const found = this._findCardFromWalk(start);
+    if (cacheKey) this._cardFromCache.set(cacheKey, found);
+    return found;
+  },
+
+  _findCardFromWalk: function (start) {
     let curr = start.nodeType === Node.TEXT_NODE ? start.parentElement : start;
     let candidate = null;
     let depth = 0;
@@ -71,7 +101,7 @@ TZ.cards = {
         }
       }
       const hasImg = images.length >= 1;
-      const text = TZ.deepInnerText(curr);
+      const text = this._lightText(curr);
       if (text.includes("知了数据") && !/已售/.test(text)) {
         curr = TZ.composedParent(curr);
         depth += 1;
@@ -82,7 +112,14 @@ TZ.cards = {
         candidate = curr;
         const parent = TZ.composedParent(curr);
         if (parent && parent !== document.body) {
-          const parentSold = (TZ.deepInnerText(parent).match(/已售/g) || []).length;
+          const parentLinks = parent.querySelectorAll ? parent.querySelectorAll("a[href]") : [];
+          if (parentLinks.length > 16) break;
+          if (!hasSoldOrPrice) {
+            curr = parent;
+            depth += 1;
+            continue;
+          }
+          const parentSold = (this._lightText(parent).match(/已售/g) || []).length;
           const currSold = (text.match(/已售/g) || []).length;
           if (parentSold > currSold + 1) break;
         }
@@ -123,43 +160,70 @@ TZ.cards = {
     return out;
   },
 
+  _addCard: function (map, start, zhiliaoEl) {
+    if (!start || this._isOurHost(start)) return;
+    const card = this.findCardFrom(start) || (start.nodeType === 1 ? start : start.parentElement);
+    if (!card || this._isOurHost(card)) return;
+    const prev = map.get(card);
+    if (prev) {
+      if (!prev.zhiliaoEl && zhiliaoEl) prev.zhiliaoEl = zhiliaoEl;
+      return;
+    }
+    map.set(card, { card: card, zhiliaoEl: zhiliaoEl || null });
+  },
+
   collect: function () {
     const map = new Map();
-    const panels = this.findZhiliaoPanels();
+    if (!document.body) return [];
 
-    panels.forEach((panel) => {
-      const card = this.findCardFrom(panel) || panel.parentElement;
-      if (!card || this._isOurHost(card)) return;
-      map.set(card, { card: card, zhiliaoEl: panel });
-    });
-
-    this.listContainerChildren().forEach((el) => {
-      if (this._isOurHost(el)) return;
-      const card = this.findCardFrom(el) || el;
-      if (!card || map.has(card)) return;
-      const parsedProbe = card.querySelector("a[href], img");
-      if (!parsedProbe) return;
-      map.set(card, { card: card, zhiliaoEl: this._panelInside(card, panels) });
-    });
-
-    const keys = Array.from(map.keys());
-    keys.forEach((c) => {
-      for (let i = 0; i < keys.length; i++) {
-        const other = keys[i];
-        if (c !== other && other.contains(c)) {
-          map.delete(c);
-          break;
-        }
+    TZ.beginScan();
+    try {
+      const anchors = document.body.querySelectorAll("a[href]");
+      for (let i = 0; i < anchors.length; i++) {
+        const a = anchors[i];
+        if (this._isOurHost(a)) continue;
+        if (!TZ.isProductHref(TZ.productHref(a))) continue;
+        this._addCard(map, a, null);
       }
-    });
 
-    const records = [];
-    map.forEach((entry) => {
-      const parsed = TZ.parseCard(entry.card, entry.zhiliaoEl || this._panelInside(entry.card, panels));
-      if (!parsed.title && !parsed.zhiliao.present && !parsed.href) return;
-      records.push(parsed);
-    });
-    return records;
+      this.listContainerChildren().forEach((el) => this._addCard(map, el, null));
+
+      if (map.size === 0) {
+        this.findZhiliaoPanels().forEach((panel) => {
+          this._addCard(map, panel, panel);
+        });
+      }
+
+      const keys = Array.from(map.keys());
+      keys.forEach((c) => {
+        for (let i = 0; i < keys.length; i++) {
+          const other = keys[i];
+          if (c !== other && other.contains(c)) {
+            map.delete(c);
+            break;
+          }
+        }
+      });
+
+      const records = [];
+      map.forEach((entry) => {
+        const card = entry.card;
+        const cached = this._parseCache.get(card);
+        const fp = this._lightFp(card);
+        let parsed;
+        if (cached && cached.fp === fp && cached.parsed && cached.parsed.zhiliao && cached.parsed.zhiliao.present) {
+          parsed = cached.parsed;
+        } else {
+          parsed = TZ.parseCard(card, entry.zhiliaoEl);
+          this._parseCache.set(card, { fp: fp, parsed: parsed });
+        }
+        if (!parsed.title && !parsed.zhiliao.present && !parsed.href) return;
+        records.push(parsed);
+      });
+      return records;
+    } finally {
+      TZ.endScan();
+    }
   },
 
   _panelInside: function (card, panels) {
@@ -170,7 +234,25 @@ TZ.cards = {
   },
 
   _zhiliaoInside: function (card) {
-    return this._panelInside(card, this.findZhiliaoPanels());
+    if (!card) return null;
+    const hits = [];
+    this._collectTextHits(card, hits);
+    if (!hits.length) return null;
+    let el = hits[0].parentElement || TZ.composedParent(hits[0]);
+    let panel = el;
+    for (let i = 0; i < 12 && el && el !== card; i++) {
+      if (this._isOurHost(el)) break;
+      const t = this._lightText(el);
+      if (
+        (t.includes("知了数据") || t.includes("上架时间")) &&
+        (t.includes("销量") || t.includes("商品") || t.includes("品类") || t.includes("上架时间"))
+      ) {
+        panel = el;
+      }
+      el = TZ.composedParent(el);
+    }
+    if (!panel || this._isOurHost(panel)) return null;
+    return card.contains(panel) ? panel : null;
   },
 
   inViewport: function (el) {

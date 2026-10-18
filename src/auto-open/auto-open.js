@@ -102,10 +102,17 @@ TZ.autoOpen = {
     const cards = TZ.dimmer.passingCards();
     for (const el of cards) {
       if (el.getAttribute(TZ.AD_ATTR) === "1") continue;
-      const parsed = TZ.parseCard(el, TZ.cards._zhiliaoInside(el));
-      if (!parsed.href || parsed.isAd) continue;
-      if (this.seen.has(parsed.href)) continue;
-      return { el: el, href: parsed.href };
+      let href = "";
+      const anchors = el.querySelectorAll("a[href]");
+      for (let i = 0; i < anchors.length; i++) {
+        const h = TZ.productHref(anchors[i]);
+        if (TZ.isProductHref(h)) {
+          href = h;
+          break;
+        }
+      }
+      if (!href || this.seen.has(href)) continue;
+      return { el: el, href: href };
     }
     return null;
   },
