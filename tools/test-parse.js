@@ -80,6 +80,13 @@ if (z3.daily !== null) {
 }
 eq("extract 2y", T.extractListedRaw(shot), "2年前");
 eq("extract split", T.extractListedRaw("上架时间：\n2年前\n评分/评论数：4.50"), "2年前");
+const dashSales =
+  "知了数据 商品 销量：日- 周- 月- 总销售额：$ 6999.99 上架时间：2年前 评分/评论数：4.70 / 4686 品类：毛球 店铺 店铺名：X 开店时间：3年前";
+const zDash = T.parseZhiliaoText(dashSales);
+if (zDash.listedRaw !== "2年前" || zDash.listedMonths !== 24 || zDash.daily !== null) {
+  console.log("FAIL dash sales listed", zDash);
+  fail += 1;
+}
 
 console.log(fail === 0 ? "PARSE_OK" : "PARSE_FAIL " + fail);
 process.exit(fail === 0 ? 0 : 1);

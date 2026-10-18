@@ -5,35 +5,50 @@ TZ.cards = {
     return !!(el && (el.id === TZ.HOST_ID || el.closest && el.closest("#" + TZ.HOST_ID)));
   },
 
+  _collectTextHits: function (root, hits) {
+    if (!root) return;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (node) {
+        if (!node.nodeValue) return NodeFilter.FILTER_REJECT;
+        if (node.nodeValue.includes("知了数据") || node.nodeValue.includes("上架时间")) {
+          return NodeFilter.FILTER_ACCEPT;
+        }
+        return NodeFilter.FILTER_REJECT;
+      }
+    });
+    while (walker.nextNode()) hits.push(walker.currentNode);
+    const els = root.querySelectorAll ? root.querySelectorAll("*") : [];
+    for (let i = 0; i < els.length; i++) {
+      const sr = TZ.openShadow(els[i]);
+      if (sr) this._collectTextHits(sr, hits);
+    }
+  },
+
   findZhiliaoPanels: function () {
     const panels = [];
     if (!document.body) return panels;
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
-      acceptNode: function (node) {
-        if (!node.nodeValue || !node.nodeValue.includes("知了数据")) return NodeFilter.FILTER_REJECT;
-        if (node.parentElement && node.parentElement.closest("#" + TZ.HOST_ID)) {
-          return NodeFilter.FILTER_REJECT;
-        }
-        return NodeFilter.FILTER_ACCEPT;
-      }
-    });
+    const hits = [];
+    this._collectTextHits(document.body, hits);
     const seen = new Set();
-    while (walker.nextNode()) {
-      let el = walker.currentNode.parentElement;
+    hits.forEach((node) => {
+      let el = node.parentElement || TZ.composedParent(node);
       let panel = el;
-      for (let i = 0; i < 10 && el; i++) {
+      for (let i = 0; i < 12 && el; i++) {
         if (this._isOurHost(el)) break;
-        const t = el.textContent || "";
-        if (t.includes("知了数据") && (t.includes("销量") || t.includes("商品") || t.includes("品类"))) {
+        const t = TZ.deepInnerText(el);
+        if (
+          (t.includes("知了数据") || t.includes("上架时间")) &&
+          (t.includes("销量") || t.includes("商品") || t.includes("品类") || t.includes("上架时间"))
+        ) {
           panel = el;
         }
-        el = el.parentElement;
+        el = TZ.composedParent(el);
       }
       if (panel && !seen.has(panel) && !this._isOurHost(panel)) {
         seen.add(panel);
         panels.push(panel);
       }
-    }
+    });
     return panels;
   },
 
@@ -56,17 +71,23 @@ TZ.cards = {
         }
       }
       const hasImg = images.length >= 1;
-      const text = curr.textContent || "";
-      const hasSoldOrPrice = /已售|\$\s*\d/.test(text) || text.includes("知了数据");
+      const text = TZ.deepInnerText(curr);
+      if (text.includes("知了数据") && !/已售/.test(text)) {
+        curr = TZ.composedParent(curr);
+        depth += 1;
+        continue;
+      }
+      const hasSoldOrPrice = /已售/.test(text);
       if (hasImg && (productLink || hasSoldOrPrice)) {
         candidate = curr;
-        const parent = curr.parentElement;
+        const parent = TZ.composedParent(curr);
         if (parent && parent !== document.body) {
-          const parentImages = parent.querySelectorAll("img, picture");
-          if (parent.children.length >= 2 && parentImages.length > images.length) break;
+          const parentSold = (TZ.deepInnerText(parent).match(/已售/g) || []).length;
+          const currSold = (text.match(/已售/g) || []).length;
+          if (parentSold > currSold + 1) break;
         }
       }
-      curr = curr.parentElement;
+      curr = TZ.composedParent(curr);
       depth += 1;
     }
     if (!candidate) return null;

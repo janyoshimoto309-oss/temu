@@ -32,7 +32,8 @@ TZ.observer = {
     this._wrapHistory();
     setInterval(() => {
       if (location.href !== this.url) this.onUrlChange();
-    }, 1200);
+      else this.schedule();
+    }, 1600);
   },
 
   schedule: function () {
