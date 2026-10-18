@@ -88,5 +88,27 @@ if (zDash.listedRaw !== "2年前" || zDash.listedMonths !== 24 || zDash.daily !=
   fail += 1;
 }
 
+const leftShot =
+  "知了数据\n商品\n销量：日93 周563 月1072\n总销售额：$ 4845\n上架时间：3个月前\n评分/评论数：5.00 / 6\n品类：力量训练设备\n店铺\n店铺名：dimaozhiyingdian\n评分/评论数：3.93 / 82";
+const zLeft = T.parseZhiliaoText(leftShot);
+if (zLeft.reviews !== 6 || zLeft.rating !== 5) {
+  console.log("FAIL left shot reviews", zLeft);
+  fail += 1;
+}
+const splitNums = T.parseZhiliaoText(
+  "知了数据\n商品\n销量：日93 周563 月1072\n上架时间：3个月前\n评分/评论数：\n5.00\n6\n品类：力量训练设备\n店铺\n评分/评论数：3.93 / 82"
+);
+if (splitNums.reviews !== 6 || splitNums.rating !== 5) {
+  console.log("FAIL split rating/reviews", splitNums);
+  fail += 1;
+}
+const noSlash = T.parseZhiliaoText(
+  "知了数据 商品 销量：日93 周563 月1072 上架时间：3个月前 评分/评论数： 5.00 6 品类：力量训练设备 店铺 店铺名：x 评分/评论数： 3.93 82"
+);
+if (noSlash.reviews !== 6 || noSlash.rating !== 5) {
+  console.log("FAIL no-slash reviews", noSlash);
+  fail += 1;
+}
+
 console.log(fail === 0 ? "PARSE_OK" : "PARSE_FAIL " + fail);
 process.exit(fail === 0 ? 0 : 1);

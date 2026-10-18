@@ -211,7 +211,17 @@ TZ.cards = {
         const cached = this._parseCache.get(card);
         const fp = this._lightFp(card);
         let parsed;
-        if (cached && cached.fp === fp && cached.parsed && cached.parsed.zhiliao && cached.parsed.zhiliao.present) {
+        const zCached = cached && cached.parsed && cached.parsed.zhiliao;
+        const hasMetrics = !!(
+          zCached &&
+          (zCached.daily != null ||
+            zCached.weekly != null ||
+            zCached.monthly != null ||
+            zCached.listedRaw ||
+            zCached.rating != null ||
+            zCached.reviews != null)
+        );
+        if (cached && cached.fp === fp && hasMetrics) {
           parsed = cached.parsed;
         } else {
           parsed = TZ.parseCard(card, entry.zhiliaoEl);

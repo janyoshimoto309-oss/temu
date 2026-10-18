@@ -203,6 +203,28 @@ TZ._cutShopBlock = function (text) {
   return t;
 };
 
+TZ.parseRatingReviews = function (text) {
+  const out = { rating: null, reviews: null };
+  if (!text) return out;
+  const src = String(text);
+  const start = src.search(/评分\s*[\/／]?\s*评论数/);
+  if (start < 0) return out;
+  const slice = src.slice(start, start + 96).replace(/品类[\s\S]*$/, "");
+  const nums = [];
+  const re = /(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)/g;
+  let m;
+  while ((m = re.exec(slice)) && nums.length < 3) nums.push(m[1]);
+  if (!nums.length) return out;
+  const first = TZ.parseCount(nums[0]);
+  if (first != null && first <= 5.5) {
+    out.rating = first;
+    if (nums[1] != null) out.reviews = TZ.parseCount(nums[1]);
+  } else if (first != null) {
+    out.reviews = first;
+  }
+  return out;
+};
+
 TZ._fieldAfter = function (text, labels) {
   for (let i = 0; i < labels.length; i++) {
     const re = new RegExp(labels[i] + "\\s*[:：]?\\s*([^\\n]+)");
@@ -250,13 +272,9 @@ TZ.parseZhiliaoText = function (text) {
     result.listedMonths = age.months;
   }
 
-  const rating = productBlock.match(
-    /评分\s*[\/／]\s*评论数\s*[:：]\s*([\d.]+)\s*[\/／]\s*([^\n品]+)/
-  );
-  if (rating) {
-    result.rating = TZ.parseCount(rating[1]);
-    result.reviews = TZ.parseCount(rating[2]);
-  }
+  const rr = TZ.parseRatingReviews(productBlock);
+  result.rating = rr.rating;
+  result.reviews = rr.reviews;
 
   const cat = productBlock.match(/品类\s*[:：]\s*([^\n]+)/);
   if (cat) result.category = cat[1].replace(/店铺.*$/, "").trim();
