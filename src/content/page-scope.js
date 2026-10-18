@@ -51,7 +51,8 @@ TZ.pageScope = {
 
   allowFilter: function (settings) {
     const kind = this.refresh();
-    if (kind === "detail" || kind === "shop") return false;
+    if (kind === "shop") return false;
+    if (kind === "detail") return false;
     if (kind === "search") return !!(settings && settings.searchPageEnabled);
     return true;
   }

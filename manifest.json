@@ -45,6 +45,7 @@
         "src/content/price-badge.js",
         "src/content/dimmer.js",
         "src/content/filter-engine.js",
+        "src/content/detail-recs.js",
         "src/ai/client.js",
         "src/auto-open/auto-open.js",
         "src/panel/inject.js",

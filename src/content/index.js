@@ -9,6 +9,7 @@ var TZ = TZ || {};
   await TZ.panel.mount(settings);
   TZ.pageScope.refresh();
   TZ.filter.run(settings);
+  if (TZ.detailRecs) TZ.detailRecs.run(settings);
   if (TZ.priceBadge) TZ.priceBadge.run();
   TZ.observer.start();
 
@@ -16,6 +17,7 @@ var TZ = TZ || {};
     TZ.filter.settings = next;
     TZ.panel.sync(next);
     TZ.filter.run(next);
+    if (TZ.detailRecs) TZ.detailRecs.run(next);
     if (TZ.priceBadge) TZ.priceBadge.run();
   });
 

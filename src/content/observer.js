@@ -43,6 +43,7 @@ TZ.observer = {
     if (this.timer) clearTimeout(this.timer);
     this.timer = setTimeout(() => {
       if (TZ.filter && TZ.filter.settings) TZ.filter.run(TZ.filter.settings);
+      if (TZ.detailRecs) TZ.detailRecs.run(TZ.filter.settings);
       if (TZ.priceBadge) TZ.priceBadge.run();
     }, 280);
   },
