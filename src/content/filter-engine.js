@@ -10,10 +10,23 @@ TZ.includesAny = function (hay, needles) {
   return false;
 };
 
-TZ.evaluateRules = function (parsed, settings) {
+TZ.packEnabled = function (th) {
+  if (!th) return false;
+  return (
+    TZ.emptyNum(th.dailySalesMin) != null ||
+    TZ.emptyNum(th.weeklySalesMin) != null ||
+    TZ.emptyNum(th.monthlySalesMin) != null ||
+    TZ.emptyNum(th.listedWithinValue) != null ||
+    TZ.emptyNum(th.ratingMin) != null ||
+    TZ.emptyNum(th.reviewMin) != null ||
+    TZ.emptyNum(th.temuSoldMin) != null
+  );
+};
+
+TZ.numericReasons = function (parsed, th) {
   const reasons = [];
-  const th = (settings && settings.thresholds) || {};
-  const z = parsed.zhiliao || {};
+  th = th || {};
+  const z = (parsed && parsed.zhiliao) || {};
   const hasZ = !!z.present;
 
   const failMin = function (got, min, label) {
@@ -47,8 +60,14 @@ TZ.evaluateRules = function (parsed, settings) {
     }
   }
 
-  failMin(parsed.sold, th.temuSoldMin, "前台已售");
+  failMin(parsed && parsed.sold, th.temuSoldMin, "前台已售");
+  return reasons;
+};
 
+TZ.exclusionReasons = function (parsed, settings) {
+  const reasons = [];
+  const z = (parsed && parsed.zhiliao) || {};
+  const hasZ = !!z.present;
   const enabled = (settings && settings.exclusions) || {};
   TZ.RULE_EXCLUSIONS.forEach((rule) => {
     if (!enabled[rule.id]) return;
@@ -66,11 +85,41 @@ TZ.evaluateRules = function (parsed, settings) {
       reasons.push("标题/品类命中「" + rule.label + "」");
     }
   });
+  return reasons;
+};
+
+TZ.evaluateRules = function (parsed, settings) {
+  const exReasons = TZ.exclusionReasons(parsed, settings);
+  if (exReasons.length) {
+    return { dim: true, reasons: exReasons, needAi: false };
+  }
+
+  const thA = (settings && settings.thresholds) || {};
+  const thB = (settings && settings.thresholdsB) || {};
+  const packA = TZ.packEnabled(thA);
+  const packB = TZ.packEnabled(thB);
+  const failA = packA ? TZ.numericReasons(parsed, thA) : [];
+  const failB = packB ? TZ.numericReasons(parsed, thB) : [];
+  const passA = packA && failA.length === 0;
+  const passB = packB && failB.length === 0;
+  const numFail = (packA || packB) && !passA && !passB;
+
+  let reasons = [];
+  if (numFail) {
+    if (packA && packB) {
+      failA.forEach((r) => reasons.push("套1 " + r));
+      failB.forEach((r) => reasons.push("套2 " + r));
+    } else if (packA) {
+      reasons = failA;
+    } else {
+      reasons = failB;
+    }
+  }
 
   return {
-    dim: reasons.length > 0,
+    dim: numFail,
     reasons: reasons,
-    needAi: reasons.length === 0
+    needAi: !numFail
   };
 };
 

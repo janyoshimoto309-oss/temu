@@ -64,6 +64,28 @@ TZ.panel = {
     this.sync(settings);
   },
 
+  _thresholdGrid: function (attr, unitAttr) {
+    return `
+            <div class="tz-grid">
+              <div class="tz-field"><label>知了日销 ≥</label><input type="number" min="0" ${attr}="dailySalesMin" placeholder="空=不启用"></div>
+              <div class="tz-field"><label>知了周销 ≥</label><input type="number" min="0" ${attr}="weeklySalesMin" placeholder="空=不启用"></div>
+              <div class="tz-field"><label>知了月销 ≥</label><input type="number" min="0" ${attr}="monthlySalesMin" placeholder="空=不启用"></div>
+              <div class="tz-field"><label>Temu 已售 ≥</label><input type="number" min="0" ${attr}="temuSoldMin" placeholder="空=不启用"></div>
+              <div class="tz-field"><label>知了评分 ≥</label><input type="number" min="0" step="0.1" ${attr}="ratingMin" placeholder="空=不启用"></div>
+              <div class="tz-field"><label>知了评论 ≥</label><input type="number" min="0" ${attr}="reviewMin" placeholder="空=不启用"></div>
+              <div class="tz-field span2">
+                <label>上架超过此时长就变灰（近 N）</label>
+                <div class="tz-row">
+                  <input type="number" min="0" ${attr}="listedWithinValue" placeholder="空=不启用">
+                  <select ${unitAttr}="listedWithinUnit">
+                    <option value="month">个月</option>
+                    <option value="day">天</option>
+                  </select>
+                </div>
+              </div>
+            </div>`;
+  },
+
   _html: function () {
     const ruleChecks = TZ.RULE_EXCLUSIONS.map(
       (r) =>
@@ -97,7 +119,7 @@ TZ.panel = {
         <div class="tz-body">
           <div class="tz-block">
             <div class="tz-block-title">
-              筛选 <span class="hint">任一条不达标即变灰</span>
+              筛选 <span class="hint">两套数字为或 · 品类命中即灰</span>
               <button class="tz-btn primary" type="button" data-act="saveRules">保存规则</button>
             </div>
             <div class="tz-muted" data-el="saveMeta" style="margin-bottom:8px">改完会自动记住，下次打开自动加载。也可点保存。</div>
@@ -105,25 +127,11 @@ TZ.panel = {
               <input type="checkbox" data-el="searchPageEnabled">
               <span>搜索页也筛选（默关）</span>
             </label>
-            <div class="tz-grid">
-              <div class="tz-field"><label>知了日销 ≥</label><input type="number" min="0" data-th="dailySalesMin" placeholder="空=不启用"></div>
-              <div class="tz-field"><label>知了周销 ≥</label><input type="number" min="0" data-th="weeklySalesMin" placeholder="空=不启用"></div>
-              <div class="tz-field"><label>知了月销 ≥</label><input type="number" min="0" data-th="monthlySalesMin" placeholder="空=不启用"></div>
-              <div class="tz-field"><label>Temu 已售 ≥</label><input type="number" min="0" data-th="temuSoldMin" placeholder="空=不启用"></div>
-              <div class="tz-field"><label>知了评分 ≥</label><input type="number" min="0" step="0.1" data-th="ratingMin" placeholder="空=不启用"></div>
-              <div class="tz-field"><label>知了评论 ≥</label><input type="number" min="0" data-th="reviewMin" placeholder="空=不启用"></div>
-              <div class="tz-field span2">
-                <label>上架超过此时长就变灰（近 N）</label>
-                <div class="tz-row">
-                  <input type="number" min="0" data-th="listedWithinValue" placeholder="空=不启用">
-                  <select data-th-unit="listedWithinUnit">
-                    <option value="month">个月</option>
-                    <option value="day">天</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div class="tz-muted" style="margin:6px 0 8px">数字门槛是「并且」：只要有一条不合格就变灰。页面上销量为「-」或空的，跳过该条，不因此筛掉。</div>
+            <div class="tz-pack-title">第一套数字</div>
+            ${this._thresholdGrid("data-th", "data-th-unit")}
+            <div class="tz-pack-title">第二套数字（过此套也可留下）</div>
+            ${this._thresholdGrid("data-th-b", "data-th-b-unit")}
+            <div class="tz-muted" style="margin:6px 0 8px">两套之间是「或」：过其中一套数字门槛即可留下。每套内部仍是「并且」。某套全空则该套不启用。页面上销量为「-」或空的，跳过该条。品类命中仍变灰，数字救不回来。</div>
             <div class="tz-block-title" style="margin-top:10px">不看 / 不做（规则）</div>
             <div class="tz-checks">${ruleChecks}</div>
           </div>
@@ -224,6 +232,14 @@ TZ.panel = {
     const unit = this.root.querySelector("[data-th-unit]");
     if (unit) th.listedWithinUnit = unit.value;
 
+    if (!s.thresholdsB) s.thresholdsB = {};
+    const thB = s.thresholdsB;
+    this.root.querySelectorAll("[data-th-b]").forEach((input) => {
+      thB[input.getAttribute("data-th-b")] = TZ.emptyNum(input.value);
+    });
+    const unitB = this.root.querySelector("[data-th-b-unit]");
+    if (unitB) thB.listedWithinUnit = unitB.value;
+
     s.exclusions = {};
     this.root.querySelectorAll("[data-ex]").forEach((box) => {
       s.exclusions[box.getAttribute("data-ex")] = box.checked;
@@ -285,7 +301,7 @@ TZ.panel = {
     this._el("autoMax").value = settings.autoOpen.maxCount;
     this._el("autoInterval").value = settings.autoOpen.intervalSec;
 
-    const th = settings.thresholds;
+    const th = settings.thresholds || {};
     this.root.querySelectorAll("[data-th]").forEach((input) => {
       const key = input.getAttribute("data-th");
       const v = th[key];
@@ -293,6 +309,15 @@ TZ.panel = {
     });
     const unit = this.root.querySelector("[data-th-unit]");
     if (unit) unit.value = th.listedWithinUnit || "month";
+
+    const thB = settings.thresholdsB || {};
+    this.root.querySelectorAll("[data-th-b]").forEach((input) => {
+      const key = input.getAttribute("data-th-b");
+      const v = thB[key];
+      input.value = v == null ? "" : v;
+    });
+    const unitB = this.root.querySelector("[data-th-b-unit]");
+    if (unitB) unitB.value = thB.listedWithinUnit || "month";
 
     this.root.querySelectorAll("[data-ex]").forEach((box) => {
       box.checked = !!(settings.exclusions && settings.exclusions[box.getAttribute("data-ex")]);

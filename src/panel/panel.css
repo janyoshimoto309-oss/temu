@@ -165,6 +165,13 @@
   font-size: 11px;
 }
 
+.tz-pack-title {
+  font-size: 11px;
+  font-weight: 650;
+  color: #c4b5fd;
+  margin: 10px 0 6px;
+}
+
 .tz-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

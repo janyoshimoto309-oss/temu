@@ -9,6 +9,7 @@ TZ.mergeSettings = function (saved) {
   if (!saved || typeof saved !== "object") return base;
   const out = Object.assign(base, saved);
   out.thresholds = Object.assign(base.thresholds, saved.thresholds || {});
+  out.thresholdsB = Object.assign(base.thresholdsB, saved.thresholdsB || {});
   out.exclusions = Object.assign({}, saved.exclusions || {});
   out.aiExclusions = Object.assign({}, saved.aiExclusions || {});
   out.ai = Object.assign(base.ai, saved.ai || {});

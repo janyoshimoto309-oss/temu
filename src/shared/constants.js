@@ -113,6 +113,16 @@ TZ.DEFAULT_SETTINGS = {
     reviewMin: null,
     temuSoldMin: null
   },
+  thresholdsB: {
+    dailySalesMin: null,
+    weeklySalesMin: null,
+    monthlySalesMin: null,
+    listedWithinValue: null,
+    listedWithinUnit: "month",
+    ratingMin: null,
+    reviewMin: null,
+    temuSoldMin: null
+  },
   exclusions: {},
   aiExclusions: {},
   ai: {

@@ -5,7 +5,7 @@
 硬规则（摘要）：
 
 - 只读 DOM，不碰 Temu/知了接口；知了封闭 Shadow 能读不能写。
-- 新功能独立文件，不要改 `parseCard` / `evaluateRules` / `findCardFrom` / `collect`。
+- 新功能独立文件，不要改 `parseCard` / `evaluateRules` / `findCardFrom` / `collect` 来夹带半价或点开。两套数字门槛已在 `evaluateRules` 里，不要再二次 mark。
 - 性能优化不要和筛选逻辑混在一次改动里。
 - A/B 筛选变灰 与 C 自动点开、半价数字，三者互不嵌套。
 - 对用户用简体中文。未点名不要 commit / push。
