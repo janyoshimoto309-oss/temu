@@ -157,6 +157,7 @@ TZ.panel = {
             <div class="tz-grid" style="margin-top:8px">
               <div class="tz-field"><label>最多点开 N 个</label><input type="number" min="1" data-el="autoMax"></div>
               <div class="tz-field"><label>两次间隔（秒）</label><input type="number" min="0.8" step="0.1" data-el="autoInterval"></div>
+              <div class="tz-field span2"><label>只点日销 ≥（仅自动点开，不变灰）</label><input type="number" min="0" data-el="autoDaily" placeholder="空=不限制"></div>
             </div>
             <div class="tz-row" style="margin-top:8px">
               <button class="tz-btn primary" type="button" data-act="aoStart">开始</button>
@@ -224,6 +225,7 @@ TZ.panel = {
     s.autoOpen.enabled = this._el("autoEnabled").checked;
     s.autoOpen.maxCount = TZ.emptyNum(this._el("autoMax").value) || 10;
     s.autoOpen.intervalSec = TZ.emptyNum(this._el("autoInterval").value) || 2.5;
+    s.autoOpen.dailySalesMin = TZ.emptyNum(this._el("autoDaily").value);
 
     const th = s.thresholds;
     this.root.querySelectorAll("[data-th]").forEach((input) => {
@@ -300,6 +302,8 @@ TZ.panel = {
     this._el("autoEnabled").checked = !!(settings.autoOpen && settings.autoOpen.enabled);
     this._el("autoMax").value = settings.autoOpen.maxCount;
     this._el("autoInterval").value = settings.autoOpen.intervalSec;
+    const autoDaily = settings.autoOpen.dailySalesMin;
+    this._el("autoDaily").value = autoDaily == null ? "" : autoDaily;
 
     const th = settings.thresholds || {};
     this.root.querySelectorAll("[data-th]").forEach((input) => {

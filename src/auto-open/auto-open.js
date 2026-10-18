@@ -78,10 +78,10 @@ TZ.autoOpen = {
       return;
     }
 
-    const next = this._nextCard();
+    const next = this._nextCard(settings);
     if (!next) {
       this.timer = setTimeout(() => this._tick(settings), 1200);
-      this._emit("等待未变灰商品… " + this.opened + "/" + max);
+      this._emit("等待未变灰且日销达标的商品… " + this.opened + "/" + max);
       if (TZ.panel && TZ.panel.updateAutoOpen) TZ.panel.updateAutoOpen();
       return;
     }
@@ -98,10 +98,31 @@ TZ.autoOpen = {
     this.timer = setTimeout(() => this._tick(settings), wait);
   },
 
-  _nextCard: function () {
+  _dailyOf: function (el) {
+    const recs = TZ.filter && TZ.filter.lastRecords;
+    if (!recs || !el) return null;
+    for (let i = 0; i < recs.length; i++) {
+      if (recs[i] && recs[i].card === el) {
+        const z = recs[i].zhiliao || {};
+        return z.daily == null ? null : z.daily;
+      }
+    }
+    return null;
+  },
+
+  _passesDaily: function (el, settings) {
+    const min = TZ.emptyNum(settings && settings.autoOpen && settings.autoOpen.dailySalesMin);
+    if (min == null) return true;
+    const daily = this._dailyOf(el);
+    if (daily == null) return false;
+    return daily >= min;
+  },
+
+  _nextCard: function (settings) {
     const cards = TZ.dimmer.passingCards();
     for (const el of cards) {
       if (el.getAttribute(TZ.AD_ATTR) === "1") continue;
+      if (!this._passesDaily(el, settings)) continue;
       let href = "";
       const anchors = el.querySelectorAll("a[href]");
       for (let i = 0; i < anchors.length; i++) {

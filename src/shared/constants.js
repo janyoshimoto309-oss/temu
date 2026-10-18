@@ -132,7 +132,8 @@ TZ.DEFAULT_SETTINGS = {
   autoOpen: {
     enabled: false,
     maxCount: 10,
-    intervalSec: 2.5
+    intervalSec: 2.5,
+    dailySalesMin: null
   },
   savedAt: null
 };
