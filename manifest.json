@@ -1,0 +1,57 @@
+{
+  "manifest_version": 3,
+  "name": "Temu × 知了筛选",
+  "version": "0.1.0",
+  "description": "只读 Temu 列表与知了蓝框，按门槛和不看/不做名单把不合格商品卡变灰；自动点开为独立模块。",
+  "minimum_chrome_version": "114",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "展开 / 收起筛选面板",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/background/service-worker.js"
+  },
+  "permissions": ["storage", "tabs"],
+  "host_permissions": [
+    "*://*.temu.com/*",
+    "*://*.kwcdn.com/*",
+    "https://generativelanguage.googleapis.com/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["src/panel/panel.css"],
+      "matches": ["*://*.temu.com/*"]
+    }
+  ],
+  "content_scripts": [
+    {
+      "matches": ["*://*.temu.com/*"],
+      "js": [
+        "src/shared/constants.js",
+        "src/shared/storage.js",
+        "src/content/page-scope.js",
+        "src/content/parser.js",
+        "src/content/cards.js",
+        "src/content/dimmer.js",
+        "src/content/filter-engine.js",
+        "src/ai/client.js",
+        "src/auto-open/auto-open.js",
+        "src/panel/inject.js",
+        "src/content/observer.js",
+        "src/content/index.js"
+      ],
+      "css": ["styles/dim.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

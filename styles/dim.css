@@ -1,0 +1,15 @@
+.tz-card-dim {
+  filter: grayscale(1) opacity(0.45) !important;
+  transition: filter 0.18s ease;
+  outline: 1px dashed rgba(90, 90, 90, 0.4);
+  outline-offset: 2px;
+}
+
+html.tz-pause-dim .tz-card-dim {
+  filter: none !important;
+  outline: none;
+}
+
+.tz-card-marked {
+  /* evaluated marker, no visual by itself */
+}
