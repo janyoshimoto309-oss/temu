@@ -42,6 +42,7 @@
         "src/content/page-scope.js",
         "src/content/parser.js",
         "src/content/cards.js",
+        "src/content/price-badge.js",
         "src/content/dimmer.js",
         "src/content/filter-engine.js",
         "src/ai/client.js",

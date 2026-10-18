@@ -13,3 +13,27 @@ html.tz-pause-dim .tz-card-dim {
 .tz-card-marked {
   /* evaluated marker, no visual by itself */
 }
+
+.tz-half-price {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #fb7701;
+  pointer-events: none;
+  user-select: none;
+  line-height: 1.2;
+}
+
+.tz-half-price--list {
+  display: block;
+  font-size: 16px;
+  margin: 4px 8px 2px;
+}
+
+.tz-half-price--detail {
+  display: inline-block;
+  flex: 0 0 auto;
+  font-size: 22px;
+  margin-left: 10px;
+  vertical-align: middle;
+  white-space: nowrap;
+}

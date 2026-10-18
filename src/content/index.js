@@ -9,12 +9,14 @@ var TZ = TZ || {};
   await TZ.panel.mount(settings);
   TZ.pageScope.refresh();
   TZ.filter.run(settings);
+  if (TZ.priceBadge) TZ.priceBadge.run();
   TZ.observer.start();
 
   TZ.onSettingsChange((next) => {
     TZ.filter.settings = next;
     TZ.panel.sync(next);
     TZ.filter.run(next);
+    if (TZ.priceBadge) TZ.priceBadge.run();
   });
 
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {

@@ -110,5 +110,13 @@ if (noSlash.reviews !== 6 || noSlash.rating !== 5) {
   fail += 1;
 }
 
+eq("price $3.90", T.parsePriceNumber("$3.90"), 3.9);
+eq("price 3.32", T.parsePriceNumber("$3.32"), 3.32);
+eq("half 3.90", T.formatHalfPrice(3.9), "1.95");
+eq("half 3.32", T.formatHalfPrice(3.32), "1.66");
+eq("half 1.31", T.formatHalfPrice(1.31), "0.66");
+eq("half 3.94", T.formatHalfPrice(3.94), "1.97");
+eq("half no dollar", T.formatHalfPrice("$7.07"), "3.54");
+
 console.log(fail === 0 ? "PARSE_OK" : "PARSE_FAIL " + fail);
 process.exit(fail === 0 ? 0 : 1);

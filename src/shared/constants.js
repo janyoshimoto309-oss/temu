@@ -8,6 +8,8 @@ TZ.ID_ATTR = "data-tz-id";
 TZ.AD_ATTR = "data-tz-ad";
 TZ.DIM_CLASS = "tz-card-dim";
 TZ.PAUSE_CLASS = "tz-pause-dim";
+TZ.HALF_CLASS = "tz-half-price";
+TZ.HALF_ATTR = "data-tz-half";
 
 TZ.STORAGE_SETTINGS = "tzSettings";
 TZ.STORAGE_API_KEY = "tzApiKey";

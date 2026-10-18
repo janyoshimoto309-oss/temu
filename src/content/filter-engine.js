@@ -78,6 +78,7 @@ TZ.filter = {
   settings: null,
   lastPreview: [],
   lastReasons: [],
+  lastRecords: [],
 
   run: function (settings) {
     this.settings = settings || this.settings;
@@ -88,11 +89,13 @@ TZ.filter = {
     if (!TZ.pageScope.allowFilter(this.settings)) {
       TZ.dimmer.resetAll();
       this.lastPreview = [];
+      this.lastRecords = [];
       TZ.panel && TZ.panel.updateStatus && TZ.panel.updateStatus();
       return { dimmed: 0, marked: 0, preview: [] };
     }
 
     const records = TZ.cards.collect();
+    this.lastRecords = records;
     const seen = new Set();
     const preview = [];
     const aiQueue = [];

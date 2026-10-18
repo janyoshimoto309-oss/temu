@@ -282,6 +282,23 @@ TZ.parseZhiliaoText = function (text) {
   return result;
 };
 
+TZ.parsePriceNumber = function (raw) {
+  if (raw == null || raw === "") return null;
+  let s = TZ.normalizeDigits(String(raw)).replace(/,/g, "").replace(/\u00a0/g, " ").trim();
+  s = s.replace(/US\$/gi, "$");
+  const m = s.match(/[\$€£¥￥]?\s*(\d+(?:\.\d+)?)/);
+  if (!m) return null;
+  const n = parseFloat(m[1]);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return n;
+};
+
+TZ.formatHalfPrice = function (price) {
+  const n = typeof price === "number" ? price : TZ.parsePriceNumber(price);
+  if (n == null) return "";
+  return (n / 2).toFixed(2);
+};
+
 TZ.parseTemuSold = function (text) {
   if (!text) return null;
   const m =

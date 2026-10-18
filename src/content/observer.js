@@ -19,6 +19,7 @@ TZ.observer = {
         for (const node of m.addedNodes) {
           if (node.nodeType !== 1) continue;
           if (node.id === TZ.HOST_ID || (node.closest && node.closest("#" + TZ.HOST_ID))) continue;
+          if (node.classList && node.classList.contains(TZ.HALF_CLASS)) continue;
           const tag = node.tagName;
           if (tag === "SCRIPT" || tag === "STYLE" || tag === "LINK" || tag === "META") continue;
           relevant = true;
@@ -42,6 +43,7 @@ TZ.observer = {
     if (this.timer) clearTimeout(this.timer);
     this.timer = setTimeout(() => {
       if (TZ.filter && TZ.filter.settings) TZ.filter.run(TZ.filter.settings);
+      if (TZ.priceBadge) TZ.priceBadge.run();
     }, 280);
   },
 
