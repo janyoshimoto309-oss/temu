@@ -1,13 +1,18 @@
 var TZ = TZ || {};
 
 TZ.detailRecs = {
+  _href: "",
+
   run: function (settings) {
     settings = settings || (TZ.filter && TZ.filter.settings);
     if (!settings) return;
     if (!TZ.pageScope || TZ.pageScope.refresh() !== "detail") return;
 
     TZ.dimmer.applyPause(settings.pauseDim);
-    TZ.dimmer.resetAll();
+    if (location.href !== this._href) {
+      this._href = location.href;
+      TZ.dimmer.resetAll();
+    }
 
     const pageId = TZ.goodsIdFromHref(location.href);
     const map = new Map();

@@ -8,19 +8,21 @@ TZ.priceBadge = {
       return;
     }
     if (kind === "detail") {
-      this._clearList();
       this._markDetail();
+      this._markListFromRecords(false);
       return;
     }
     this._clearDetail();
-    const records =
-      TZ.filter && TZ.filter.lastRecords && TZ.filter.lastRecords.length
-        ? TZ.filter.lastRecords
-        : TZ.cards && TZ.cards.collect
-          ? TZ.cards.collect()
-          : [];
+    this._markListFromRecords(true);
+  },
+
+  _markListFromRecords: function (allowCollect) {
+    let records = TZ.filter && TZ.filter.lastRecords ? TZ.filter.lastRecords : [];
+    if ((!records || !records.length) && allowCollect && TZ.cards && TZ.cards.collect) {
+      records = TZ.cards.collect();
+    }
     const seen = new Set();
-    records.forEach((parsed) => {
+    (records || []).forEach((parsed) => {
       if (!parsed || !parsed.card) return;
       this._markCard(parsed);
       seen.add(parsed.card);
