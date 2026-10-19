@@ -16,6 +16,7 @@ var TZ = TZ || {};
   TZ.onSettingsChange((next) => {
     TZ.filter.settings = next;
     TZ.panel.sync(next);
+    if (!TZ.isPluginOn(next) && TZ.autoOpen && TZ.autoOpen.running) TZ.autoOpen.stop();
     TZ.filter.run(next);
     if (TZ.detailRecs) TZ.detailRecs.run(next);
     if (TZ.priceBadge) TZ.priceBadge.run();

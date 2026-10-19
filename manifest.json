@@ -11,7 +11,8 @@
     "128": "icons/icon128.png"
   },
   "action": {
-    "default_title": "展开 / 收起筛选面板",
+    "default_popup": "src/popup/popup.html",
+    "default_title": "Temu × 知了筛选",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",

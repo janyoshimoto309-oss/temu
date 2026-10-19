@@ -9,7 +9,8 @@ const MSG = {
   OPEN_TAB: "TZ_OPEN_TAB",
   SET_API_KEY: "TZ_SET_API_KEY",
   GET_API_KEY_META: "TZ_GET_API_KEY_META",
-  AI_CLASSIFY: "TZ_AI_CLASSIFY"
+  AI_CLASSIFY: "TZ_AI_CLASSIFY",
+  SET_PLUGIN_ENABLED: "TZ_SET_PLUGIN_ENABLED"
 };
 
 const LABEL_TEXT = {
@@ -18,13 +19,6 @@ const LABEL_TEXT = {
   adult: "adult / sexual / 18+ themed products",
   foodContact: "food-contact items (cups, bowls, cutlery, straws, lunch boxes) that may be food-safety sensitive"
 };
-
-chrome.action.onClicked.addListener((tab) => {
-  if (!tab || !tab.id) return;
-  chrome.tabs.sendMessage(tab.id, { type: MSG.TOGGLE_PANEL }, () => {
-    void chrome.runtime.lastError;
-  });
-});
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!msg || !msg.type) return;
@@ -50,6 +44,14 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     classify(msg)
       .then((res) => sendResponse(res))
       .catch((err) => sendResponse({ ok: false, error: String(err.message || err) }));
+    return true;
+  }
+  if (msg.type === MSG.SET_PLUGIN_ENABLED) {
+    chrome.storage.local.get(STORAGE_SETTINGS, (data) => {
+      const cur = data[STORAGE_SETTINGS] || {};
+      cur.pluginEnabled = msg.enabled !== false;
+      chrome.storage.local.set({ [STORAGE_SETTINGS]: cur }, () => sendResponse({ ok: true }));
+    });
     return true;
   }
 });

@@ -6,6 +6,7 @@ TZ.detailRecs = {
   run: function (settings) {
     settings = settings || (TZ.filter && TZ.filter.settings);
     if (!settings) return;
+    if (!TZ.isPluginOn(settings)) return;
     if (!TZ.pageScope || TZ.pageScope.refresh() !== "detail") return;
 
     TZ.dimmer.applyPause(settings.pauseDim);

@@ -21,7 +21,13 @@ TZ.MSG = {
   SET_API_KEY: "TZ_SET_API_KEY",
   GET_API_KEY_META: "TZ_GET_API_KEY_META",
   AI_CLASSIFY: "TZ_AI_CLASSIFY",
+  SET_PLUGIN_ENABLED: "TZ_SET_PLUGIN_ENABLED",
   PING: "TZ_PING"
+};
+
+TZ.isPluginOn = function (settings) {
+  const s = settings || (TZ.filter && TZ.filter.settings);
+  return !s || s.pluginEnabled !== false;
 };
 
 TZ.RULE_EXCLUSIONS = [
@@ -100,9 +106,12 @@ TZ.AI_EXCLUSIONS = [
 ];
 
 TZ.DEFAULT_SETTINGS = {
+  pluginEnabled: true,
   searchPageEnabled: false,
   pauseDim: false,
   panelCollapsed: false,
+  panelLeft: null,
+  panelTop: null,
   thresholds: {
     dailySalesMin: null,
     weeklySalesMin: null,

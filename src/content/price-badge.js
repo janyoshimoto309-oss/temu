@@ -2,6 +2,10 @@ var TZ = TZ || {};
 
 TZ.priceBadge = {
   run: function () {
+    if (!TZ.isPluginOn()) {
+      this._clearAll();
+      return;
+    }
     const kind = TZ.pageScope ? TZ.pageScope.refresh() : "browse";
     if (kind === "shop") {
       this._clearAll();

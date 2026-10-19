@@ -135,6 +135,14 @@ TZ.filter = {
 
     TZ.dimmer.applyPause(this.settings.pauseDim);
 
+    if (!TZ.isPluginOn(this.settings)) {
+      TZ.dimmer.resetAll();
+      this.lastPreview = [];
+      this.lastRecords = [];
+      TZ.panel && TZ.panel.updateStatus && TZ.panel.updateStatus();
+      return { dimmed: 0, marked: 0, preview: [] };
+    }
+
     if (!TZ.pageScope.allowFilter(this.settings)) {
       if (TZ.pageScope.kind !== "detail") {
         TZ.dimmer.resetAll();

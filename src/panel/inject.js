@@ -25,6 +25,33 @@ TZ.panel = {
   _applyCollapsed: function () {
     if (!this.root) return;
     this.root.classList.toggle("is-collapsed", !!this.settings.panelCollapsed);
+    this._applyPos();
+    this._applyPluginOn();
+  },
+
+  _applyPluginOn: function () {
+    if (!this.root) return;
+    const on = TZ.isPluginOn(this.settings);
+    this.root.classList.toggle("is-plugin-off", !on);
+    const power = this._el("pluginPower");
+    if (power) power.checked = on;
+    if (!on && TZ.autoOpen && TZ.autoOpen.running) TZ.autoOpen.stop();
+  },
+
+  _applyPos: function () {
+    if (!this.root) return;
+    const s = this.settings || {};
+    if (s.panelLeft == null || s.panelTop == null) {
+      this.root.style.left = "";
+      this.root.style.top = "";
+      this.root.style.right = "16px";
+      this.root.style.bottom = "16px";
+      return;
+    }
+    this.root.style.right = "auto";
+    this.root.style.bottom = "auto";
+    this.root.style.left = s.panelLeft + "px";
+    this.root.style.top = s.panelTop + "px";
   },
 
   mount: async function (settings) {
@@ -61,6 +88,7 @@ TZ.panel = {
     this.host = host;
     this.root = wrap;
     this._bind();
+    this._bindDrag();
     this.sync(settings);
   },
 
@@ -109,6 +137,10 @@ TZ.panel = {
             <div class="tz-sub">只读页面 · 命中变灰仍能看清</div>
           </div>
           <div class="tz-head-actions">
+            <label class="tz-power" title="插件总开关">
+              <input type="checkbox" data-el="pluginPower" checked>
+              <span class="tz-power-track"><span class="tz-power-knob"></span></span>
+            </label>
             <button class="tz-icon-btn" type="button" data-act="collapse" title="收起">–</button>
           </div>
         </header>
@@ -191,6 +223,10 @@ TZ.panel = {
         this._applyCollapsed();
         this._persist();
       } else if (act === "expand") {
+        if (this._dragMoved) {
+          this._dragMoved = false;
+          return;
+        }
         this.settings.panelCollapsed = false;
         this._applyCollapsed();
         this._persist();
@@ -215,6 +251,82 @@ TZ.panel = {
       if (document.visibilityState === "hidden") this.saveNow(false);
     });
     window.addEventListener("pagehide", () => this.saveNow(false));
+    window.addEventListener("resize", () => {
+      if (this.settings && this.settings.panelLeft != null) {
+        this._setPos(this.settings.panelLeft, this.settings.panelTop);
+      }
+    });
+    const power = this._el("pluginPower");
+    if (power) {
+      power.addEventListener("click", (e) => e.stopPropagation());
+      power.addEventListener("change", () => {
+        if (this.syncing) return;
+        this.settings.pluginEnabled = power.checked;
+        this._applyPluginOn();
+        this._persist();
+        TZ.filter.run(this.settings);
+        if (TZ.detailRecs) TZ.detailRecs.run(this.settings);
+        if (TZ.priceBadge) TZ.priceBadge.run();
+      });
+    }
+  },
+
+  _bindDrag: function () {
+    const head = this.root.querySelector(".tz-head");
+    const dock = this.root.querySelector(".tz-dock");
+    if (head) this._makeDraggable(head, false);
+    if (dock) this._makeDraggable(dock, true);
+  },
+
+  _makeDraggable: function (handle, isDock) {
+    let sx = 0;
+    let sy = 0;
+    let sl = 0;
+    let st = 0;
+    let dragging = false;
+    let moved = 0;
+    handle.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+      if (e.target.closest(".tz-power")) return;
+      if (!isDock && e.target.closest("[data-act]")) return;
+      dragging = true;
+      moved = 0;
+      const r = this.root.getBoundingClientRect();
+      sl = r.left;
+      st = r.top;
+      sx = e.clientX;
+      sy = e.clientY;
+      try {
+        handle.setPointerCapture(e.pointerId);
+      } catch (err) {}
+    });
+    handle.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      const dx = e.clientX - sx;
+      const dy = e.clientY - sy;
+      moved += Math.abs(dx) + Math.abs(dy);
+      this._setPos(sl + dx, st + dy);
+    });
+    handle.addEventListener("pointerup", () => {
+      if (!dragging) return;
+      dragging = false;
+      this._dragMoved = moved > 6;
+      this._persist();
+    });
+  },
+
+  _setPos: function (left, top) {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const r = this.root.getBoundingClientRect();
+    const minL = vw / 2;
+    const maxL = Math.max(minL, vw - r.width - 8);
+    const maxT = Math.max(8, vh - r.height - 8);
+    left = Math.min(maxL, Math.max(minL, left));
+    top = Math.min(maxT, Math.max(8, top));
+    this.settings.panelLeft = Math.round(left);
+    this.settings.panelTop = Math.round(top);
+    this._applyPos();
   },
 
   _readForm: function () {
@@ -253,6 +365,8 @@ TZ.panel = {
 
     this._persist();
     TZ.filter.run(s);
+    if (TZ.detailRecs) TZ.detailRecs.run(s);
+    if (TZ.priceBadge) TZ.priceBadge.run();
   },
 
   _persist: function () {
@@ -296,6 +410,8 @@ TZ.panel = {
     if (!this.root) return;
     this.syncing = true;
     this._applyCollapsed();
+    this._applyPos();
+    this._applyPluginOn();
     this._el("searchPageEnabled").checked = !!settings.searchPageEnabled;
     this._el("pauseDim").checked = !!settings.pauseDim;
     this._el("aiEnabled").checked = !!(settings.ai && settings.ai.enabled);

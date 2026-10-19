@@ -22,7 +22,7 @@
   background: rgba(18, 14, 28, 0.92);
   border: 1px solid rgba(167, 139, 250, 0.35);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  cursor: pointer;
+  cursor: grab;
   color: #f5f3ff;
   user-select: none;
 }
@@ -87,9 +87,54 @@
   margin-top: 2px;
 }
 
+.tz-head {
+  cursor: grab;
+}
+
 .tz-head-actions {
   display: flex;
+  align-items: center;
   gap: 6px;
+}
+
+.tz-power {
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.tz-power input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tz-power-track {
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  background: #3f3a52;
+  position: relative;
+  display: block;
+}
+
+.tz-power-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ddd6fe;
+  transition: transform 0.15s ease;
+}
+
+.tz-power input:checked + .tz-power-track {
+  background: #6d28d9;
+}
+
+.tz-power input:checked + .tz-power-track .tz-power-knob {
+  transform: translateX(16px);
+  background: #fff;
 }
 
 .tz-icon-btn {
