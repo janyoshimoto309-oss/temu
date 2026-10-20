@@ -56,11 +56,21 @@ TZ.panel = {
 
   mount: async function (settings) {
     this.settings = settings;
-    if (document.getElementById(TZ.HOST_ID)) {
-      this.host = document.getElementById(TZ.HOST_ID);
-      this.root = this.host.shadowRoot.querySelector(".tz-root");
-      this.sync(settings);
-      return;
+    const existing = document.getElementById(TZ.HOST_ID);
+    if (existing) {
+      const root = existing.shadowRoot && existing.shadowRoot.querySelector(".tz-root");
+      if (
+        root &&
+        root.querySelector('[data-el="autoMonthly"]') &&
+        root.querySelector('[data-el="autoTemuSold"]') &&
+        root.querySelector('[data-el="autoListed"]')
+      ) {
+        this.host = existing;
+        this.root = root;
+        this.sync(settings);
+        return;
+      }
+      existing.remove();
     }
 
     const host = document.createElement("div");
@@ -186,10 +196,23 @@ TZ.panel = {
           <div class="tz-block c-block">
             <div class="tz-block-title">自动点开 <span class="hint">独立模块 C · 不参与变灰</span></div>
             <label class="tz-check"><input type="checkbox" data-el="autoEnabled"><span>启用自动点开（默认关）</span></label>
-            <div class="tz-grid" style="margin-top:8px">
+            <div class="tz-muted" style="margin:8px 0 4px">下面几条只限制点谁，空=不限制，并且才点，不变灰。</div>
+            <div class="tz-grid">
+              <div class="tz-field"><label>只点日销 ≥</label><input type="number" min="0" data-el="autoDaily" placeholder="空=不限制"></div>
+              <div class="tz-field"><label>只点月销 ≥</label><input type="number" min="0" data-el="autoMonthly" placeholder="空=不限制"></div>
+              <div class="tz-field"><label>只点 Temu 已售 ≥</label><input type="number" min="0" data-el="autoTemuSold" placeholder="空=不限制"></div>
+              <div class="tz-field span2">
+                <label>只点上架近 N（超过则不点）</label>
+                <div class="tz-row">
+                  <input type="number" min="0" data-el="autoListed" placeholder="空=不限制">
+                  <select data-el="autoListedUnit">
+                    <option value="month">个月</option>
+                    <option value="day">天</option>
+                  </select>
+                </div>
+              </div>
               <div class="tz-field"><label>最多点开 N 个</label><input type="number" min="1" data-el="autoMax"></div>
               <div class="tz-field"><label>两次间隔（秒）</label><input type="number" min="0.8" step="0.1" data-el="autoInterval"></div>
-              <div class="tz-field span2"><label>只点日销 ≥（仅自动点开，不变灰）</label><input type="number" min="0" data-el="autoDaily" placeholder="空=不限制"></div>
             </div>
             <div class="tz-row" style="margin-top:8px">
               <button class="tz-btn primary" type="button" data-act="aoStart">开始</button>
@@ -338,6 +361,11 @@ TZ.panel = {
     s.autoOpen.maxCount = TZ.emptyNum(this._el("autoMax").value) || 10;
     s.autoOpen.intervalSec = TZ.emptyNum(this._el("autoInterval").value) || 2.5;
     s.autoOpen.dailySalesMin = TZ.emptyNum(this._el("autoDaily").value);
+    s.autoOpen.monthlySalesMin = TZ.emptyNum(this._el("autoMonthly").value);
+    s.autoOpen.temuSoldMin = TZ.emptyNum(this._el("autoTemuSold").value);
+    s.autoOpen.listedWithinValue = TZ.emptyNum(this._el("autoListed").value);
+    const autoListedUnit = this._el("autoListedUnit");
+    if (autoListedUnit) s.autoOpen.listedWithinUnit = autoListedUnit.value || "month";
 
     const th = s.thresholds;
     this.root.querySelectorAll("[data-th]").forEach((input) => {
@@ -418,8 +446,16 @@ TZ.panel = {
     this._el("autoEnabled").checked = !!(settings.autoOpen && settings.autoOpen.enabled);
     this._el("autoMax").value = settings.autoOpen.maxCount;
     this._el("autoInterval").value = settings.autoOpen.intervalSec;
-    const autoDaily = settings.autoOpen.dailySalesMin;
-    this._el("autoDaily").value = autoDaily == null ? "" : autoDaily;
+    const autoDaily = this._el("autoDaily");
+    if (autoDaily) autoDaily.value = settings.autoOpen.dailySalesMin == null ? "" : settings.autoOpen.dailySalesMin;
+    const autoMonthly = this._el("autoMonthly");
+    if (autoMonthly) autoMonthly.value = settings.autoOpen.monthlySalesMin == null ? "" : settings.autoOpen.monthlySalesMin;
+    const autoTemuSold = this._el("autoTemuSold");
+    if (autoTemuSold) autoTemuSold.value = settings.autoOpen.temuSoldMin == null ? "" : settings.autoOpen.temuSoldMin;
+    const autoListed = this._el("autoListed");
+    if (autoListed) autoListed.value = settings.autoOpen.listedWithinValue == null ? "" : settings.autoOpen.listedWithinValue;
+    const autoListedUnit = this._el("autoListedUnit");
+    if (autoListedUnit) autoListedUnit.value = settings.autoOpen.listedWithinUnit || "month";
 
     const th = settings.thresholds || {};
     this.root.querySelectorAll("[data-th]").forEach((input) => {

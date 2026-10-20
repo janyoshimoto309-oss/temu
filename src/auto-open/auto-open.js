@@ -86,7 +86,7 @@ TZ.autoOpen = {
       const more = this._loadMore();
       this.timer = setTimeout(() => this._tick(settings), more ? 1800 : 1200);
       this._emit(
-        (more ? "正在下滑并点查看更多…" : "等待未变灰且日销达标的商品…") + " " + this.opened + "/" + max
+        (more ? "正在下滑并点查看更多…" : "等待未变灰且点开门槛达标的商品…") + " " + this.opened + "/" + max
       );
       if (TZ.panel && TZ.panel.updateAutoOpen) TZ.panel.updateAutoOpen();
       return;
@@ -143,31 +143,33 @@ TZ.autoOpen = {
     return false;
   },
 
-  _dailyOf: function (el) {
+  _recordOf: function (el) {
     const recs = TZ.filter && TZ.filter.lastRecords;
     if (!recs || !el) return null;
     for (let i = 0; i < recs.length; i++) {
-      if (recs[i] && recs[i].card === el) {
-        const z = recs[i].zhiliao || {};
-        return z.daily == null ? null : z.daily;
-      }
+      if (recs[i] && recs[i].card === el) return recs[i];
     }
     return null;
   },
 
-  _passesDaily: function (el, settings) {
-    const min = TZ.emptyNum(settings && settings.autoOpen && settings.autoOpen.dailySalesMin);
-    if (min == null) return true;
-    const daily = this._dailyOf(el);
-    if (daily == null) return false;
-    return daily >= min;
+  _passesExtra: function (el, settings) {
+    const ao = (settings && settings.autoOpen) || {};
+    const parsed = this._recordOf(el);
+    if (!parsed) return true;
+    const reasons = TZ.numericReasons(parsed, {
+      dailySalesMin: ao.dailySalesMin,
+      monthlySalesMin: ao.monthlySalesMin,
+      temuSoldMin: ao.temuSoldMin,
+      listedWithinValue: ao.listedWithinValue,
+      listedWithinUnit: ao.listedWithinUnit
+    });
+    return !reasons.length;
   },
 
   _nextCard: function (settings) {
     const cards = TZ.dimmer.passingCards();
     for (const el of cards) {
-      if (el.getAttribute(TZ.AD_ATTR) === "1") continue;
-      if (!this._passesDaily(el, settings)) continue;
+      if (!this._passesExtra(el, settings)) continue;
       let href = "";
       const anchors = el.querySelectorAll("a[href]");
       for (let i = 0; i < anchors.length; i++) {

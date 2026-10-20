@@ -142,7 +142,11 @@ TZ.DEFAULT_SETTINGS = {
     enabled: false,
     maxCount: 10,
     intervalSec: 2.5,
-    dailySalesMin: null
+    dailySalesMin: null,
+    monthlySalesMin: null,
+    temuSoldMin: null,
+    listedWithinValue: null,
+    listedWithinUnit: "month"
   },
   savedAt: null
 };

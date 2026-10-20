@@ -52,7 +52,6 @@ TZ.dimmer = {
   passingCards: function () {
     const out = [];
     document.querySelectorAll("[" + TZ.STATE_ATTR + '="pass"]').forEach((el) => {
-      if (el.getAttribute(TZ.AD_ATTR) === "1") return;
       out.push(el);
     });
     return out;
