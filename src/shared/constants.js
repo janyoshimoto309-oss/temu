@@ -144,6 +144,8 @@ TZ.DEFAULT_SETTINGS = {
     intervalSec: 2.5,
     dailySalesMin: null,
     monthlySalesMin: null,
+    ratingMin: null,
+    reviewMin: null,
     temuSoldMin: null,
     listedWithinValue: null,
     listedWithinUnit: "month"

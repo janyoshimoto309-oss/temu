@@ -57,21 +57,9 @@ TZ.panel = {
   mount: async function (settings) {
     this.settings = settings;
     const existing = document.getElementById(TZ.HOST_ID);
-    if (existing) {
-      const root = existing.shadowRoot && existing.shadowRoot.querySelector(".tz-root");
-      if (
-        root &&
-        root.querySelector('[data-el="autoMonthly"]') &&
-        root.querySelector('[data-el="autoTemuSold"]') &&
-        root.querySelector('[data-el="autoListed"]')
-      ) {
-        this.host = existing;
-        this.root = root;
-        this.sync(settings);
-        return;
-      }
-      existing.remove();
-    }
+    if (existing) existing.remove();
+    this.host = null;
+    this.root = null;
 
     const host = document.createElement("div");
     host.id = TZ.HOST_ID;
@@ -144,7 +132,7 @@ TZ.panel = {
         <header class="tz-head">
           <div>
             <div class="tz-title">Temu × 知了筛选</div>
-            <div class="tz-sub">只读页面 · 命中变灰仍能看清</div>
+            <div class="tz-sub">v2.1.0 · 自动点开含 Temu 已售</div>
           </div>
           <div class="tz-head-actions">
             <label class="tz-power" title="插件总开关">
@@ -159,6 +147,37 @@ TZ.panel = {
           <label class="tz-check"><input type="checkbox" data-el="pauseDim"><span>暂时取消变灰</span></label>
         </div>
         <div class="tz-body">
+          <div class="tz-block c-block">
+            <div class="tz-block-title">自动点开 <span class="hint">独立模块 C · 不参与变灰</span></div>
+            <label class="tz-check"><input type="checkbox" data-el="autoEnabled"><span>启用自动点开（默认关）</span></label>
+            <div class="tz-muted" style="margin:8px 0 4px">下面几条只限制点谁，空=不限制，并且才点，不变灰。</div>
+            <div class="tz-grid">
+              <div class="tz-field"><label>只点日销 ≥</label><input type="number" min="0" data-el="autoDaily" placeholder="空=不限制"></div>
+              <div class="tz-field"><label>只点月销 ≥</label><input type="number" min="0" data-el="autoMonthly" placeholder="空=不限制"></div>
+              <div class="tz-field"><label>只点知了评分 ≥</label><input type="number" min="0" step="0.1" data-el="autoRating" placeholder="空=不限制"></div>
+              <div class="tz-field"><label>只点知了评论 ≥</label><input type="number" min="0" data-el="autoReviews" placeholder="空=不限制"></div>
+              <div class="tz-field span2"><label>只点 Temu 已售 ≥</label><input type="number" min="0" data-el="autoTemuSold" placeholder="空=不限制"></div>
+              <div class="tz-field span2">
+                <label>只点上架近 N（超过则不点）</label>
+                <div class="tz-row">
+                  <input type="number" min="0" data-el="autoListed" placeholder="空=不限制">
+                  <select data-el="autoListedUnit">
+                    <option value="month">个月</option>
+                    <option value="day">天</option>
+                  </select>
+                </div>
+              </div>
+              <div class="tz-field"><label>最多点开 N 个</label><input type="number" min="1" data-el="autoMax"></div>
+              <div class="tz-field"><label>两次间隔（秒）</label><input type="number" min="0.8" step="0.1" data-el="autoInterval"></div>
+            </div>
+            <div class="tz-row" style="margin-top:8px">
+              <button class="tz-btn primary" type="button" data-act="aoStart">开始</button>
+              <button class="tz-btn warn" type="button" data-act="aoPause">暂停</button>
+              <button class="tz-btn ghost" type="button" data-act="aoStop">停止</button>
+            </div>
+            <div class="tz-msg" data-el="aoMsg">关着时筛选只变灰，绝不跳转。</div>
+          </div>
+
           <div class="tz-block">
             <div class="tz-block-title">
               筛选 <span class="hint">两套数字为或 · 品类命中即灰</span>
@@ -191,35 +210,6 @@ TZ.panel = {
             </div>
             <div class="tz-checks">${aiChecks}</div>
             <div class="tz-muted" style="margin-top:6px" data-el="aiStatus"></div>
-          </div>
-
-          <div class="tz-block c-block">
-            <div class="tz-block-title">自动点开 <span class="hint">独立模块 C · 不参与变灰</span></div>
-            <label class="tz-check"><input type="checkbox" data-el="autoEnabled"><span>启用自动点开（默认关）</span></label>
-            <div class="tz-muted" style="margin:8px 0 4px">下面几条只限制点谁，空=不限制，并且才点，不变灰。</div>
-            <div class="tz-grid">
-              <div class="tz-field"><label>只点日销 ≥</label><input type="number" min="0" data-el="autoDaily" placeholder="空=不限制"></div>
-              <div class="tz-field"><label>只点月销 ≥</label><input type="number" min="0" data-el="autoMonthly" placeholder="空=不限制"></div>
-              <div class="tz-field"><label>只点 Temu 已售 ≥</label><input type="number" min="0" data-el="autoTemuSold" placeholder="空=不限制"></div>
-              <div class="tz-field span2">
-                <label>只点上架近 N（超过则不点）</label>
-                <div class="tz-row">
-                  <input type="number" min="0" data-el="autoListed" placeholder="空=不限制">
-                  <select data-el="autoListedUnit">
-                    <option value="month">个月</option>
-                    <option value="day">天</option>
-                  </select>
-                </div>
-              </div>
-              <div class="tz-field"><label>最多点开 N 个</label><input type="number" min="1" data-el="autoMax"></div>
-              <div class="tz-field"><label>两次间隔（秒）</label><input type="number" min="0.8" step="0.1" data-el="autoInterval"></div>
-            </div>
-            <div class="tz-row" style="margin-top:8px">
-              <button class="tz-btn primary" type="button" data-act="aoStart">开始</button>
-              <button class="tz-btn warn" type="button" data-act="aoPause">暂停</button>
-              <button class="tz-btn ghost" type="button" data-act="aoStop">停止</button>
-            </div>
-            <div class="tz-msg" data-el="aoMsg">关着时筛选只变灰，绝不跳转。</div>
           </div>
 
           <details class="tz-more">
@@ -360,10 +350,18 @@ TZ.panel = {
     s.autoOpen.enabled = this._el("autoEnabled").checked;
     s.autoOpen.maxCount = TZ.emptyNum(this._el("autoMax").value) || 10;
     s.autoOpen.intervalSec = TZ.emptyNum(this._el("autoInterval").value) || 2.5;
-    s.autoOpen.dailySalesMin = TZ.emptyNum(this._el("autoDaily").value);
-    s.autoOpen.monthlySalesMin = TZ.emptyNum(this._el("autoMonthly").value);
-    s.autoOpen.temuSoldMin = TZ.emptyNum(this._el("autoTemuSold").value);
-    s.autoOpen.listedWithinValue = TZ.emptyNum(this._el("autoListed").value);
+    const autoDaily = this._el("autoDaily");
+    const autoMonthly = this._el("autoMonthly");
+    const autoRating = this._el("autoRating");
+    const autoReviews = this._el("autoReviews");
+    const autoTemuSold = this._el("autoTemuSold");
+    const autoListed = this._el("autoListed");
+    if (autoDaily) s.autoOpen.dailySalesMin = TZ.emptyNum(autoDaily.value);
+    if (autoMonthly) s.autoOpen.monthlySalesMin = TZ.emptyNum(autoMonthly.value);
+    if (autoRating) s.autoOpen.ratingMin = TZ.emptyNum(autoRating.value);
+    if (autoReviews) s.autoOpen.reviewMin = TZ.emptyNum(autoReviews.value);
+    if (autoTemuSold) s.autoOpen.temuSoldMin = TZ.emptyNum(autoTemuSold.value);
+    if (autoListed) s.autoOpen.listedWithinValue = TZ.emptyNum(autoListed.value);
     const autoListedUnit = this._el("autoListedUnit");
     if (autoListedUnit) s.autoOpen.listedWithinUnit = autoListedUnit.value || "month";
 
@@ -450,6 +448,10 @@ TZ.panel = {
     if (autoDaily) autoDaily.value = settings.autoOpen.dailySalesMin == null ? "" : settings.autoOpen.dailySalesMin;
     const autoMonthly = this._el("autoMonthly");
     if (autoMonthly) autoMonthly.value = settings.autoOpen.monthlySalesMin == null ? "" : settings.autoOpen.monthlySalesMin;
+    const autoRating = this._el("autoRating");
+    if (autoRating) autoRating.value = settings.autoOpen.ratingMin == null ? "" : settings.autoOpen.ratingMin;
+    const autoReviews = this._el("autoReviews");
+    if (autoReviews) autoReviews.value = settings.autoOpen.reviewMin == null ? "" : settings.autoOpen.reviewMin;
     const autoTemuSold = this._el("autoTemuSold");
     if (autoTemuSold) autoTemuSold.value = settings.autoOpen.temuSoldMin == null ? "" : settings.autoOpen.temuSoldMin;
     const autoListed = this._el("autoListed");

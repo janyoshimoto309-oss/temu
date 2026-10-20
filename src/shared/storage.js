@@ -17,10 +17,26 @@ TZ.mergeSettings = function (saved) {
   return out;
 };
 
+TZ.runtimeAlive = function () {
+  try {
+    return !!(chrome.runtime && chrome.runtime.id);
+  } catch (err) {
+    return false;
+  }
+};
+
 TZ.loadSettings = function () {
   return new Promise((resolve) => {
+    if (!TZ.runtimeAlive()) {
+      resolve(TZ.cloneDefaults());
+      return;
+    }
     try {
-      chrome.storage.local.get(TZ.STORAGE_SETTINGS, (data) => {
+      chrome.storage.local.get(TZ.STORAGE_SETTINGS, function (data) {
+        if (chrome.runtime && chrome.runtime.lastError) {
+          resolve(TZ.cloneDefaults());
+          return;
+        }
         resolve(TZ.mergeSettings(data && data[TZ.STORAGE_SETTINGS]));
       });
     } catch (err) {
@@ -33,15 +49,28 @@ TZ._writingSettings = false;
 
 TZ.saveSettings = function (settings) {
   return new Promise((resolve) => {
-    const payload = {};
     const copy = JSON.parse(JSON.stringify(settings || {}));
     copy.savedAt = Date.now();
+    if (!TZ.runtimeAlive()) {
+      resolve(copy);
+      return;
+    }
+    const payload = {};
     payload[TZ.STORAGE_SETTINGS] = copy;
     TZ._writingSettings = true;
-    chrome.storage.local.set(payload, () => {
+    try {
+      chrome.storage.local.set(payload, function () {
+        TZ._writingSettings = false;
+        if (chrome.runtime && chrome.runtime.lastError) {
+          resolve(copy);
+          return;
+        }
+        resolve(copy);
+      });
+    } catch (err) {
       TZ._writingSettings = false;
       resolve(copy);
-    });
+    }
   });
 };
 

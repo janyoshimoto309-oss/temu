@@ -159,6 +159,8 @@ TZ.autoOpen = {
     const reasons = TZ.numericReasons(parsed, {
       dailySalesMin: ao.dailySalesMin,
       monthlySalesMin: ao.monthlySalesMin,
+      ratingMin: ao.ratingMin,
+      reviewMin: ao.reviewMin,
       temuSoldMin: ao.temuSoldMin,
       listedWithinValue: ao.listedWithinValue,
       listedWithinUnit: ao.listedWithinUnit

@@ -20,6 +20,17 @@ const LABEL_TEXT = {
   foodContact: "food-contact items (cups, bowls, cutlery, straws, lunch boxes) that may be food-safety sensitive"
 };
 
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.tabs.query({ url: ["*://*.temu.com/*"] }, (tabs) => {
+    (tabs || []).forEach((tab) => {
+      if (!tab.id) return;
+      chrome.tabs.reload(tab.id, { bypassCache: true }, () => {
+        void chrome.runtime.lastError;
+      });
+    });
+  });
+});
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!msg || !msg.type) return;
   if (msg.type === MSG.OPEN_TAB) {
