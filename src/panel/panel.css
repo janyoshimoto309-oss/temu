@@ -199,6 +199,14 @@
   gap: 8px;
 }
 
+.tz-block.is-folded > .tz-block-title {
+  margin-bottom: 0;
+}
+
+.tz-block.is-folded > .tz-block-body {
+  display: none;
+}
+
 .tz-block-title .tz-btn {
   padding: 4px 8px;
   font-size: 12px;
@@ -215,6 +223,31 @@
   font-weight: 650;
   color: #c4b5fd;
   margin: 10px 0 6px;
+}
+
+.tz-preset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin: 0 0 8px;
+}
+
+.tz-preset select,
+.tz-preset input[type="text"] {
+  flex: 1 1 110px;
+  min-width: 90px;
+  max-width: 100%;
+}
+
+.tz-preset .tz-btn {
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.tz-preset + .tz-muted {
+  margin: -4px 0 8px;
+  min-height: 14px;
 }
 
 .tz-grid {

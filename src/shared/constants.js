@@ -110,6 +110,8 @@ TZ.DEFAULT_SETTINGS = {
   searchPageEnabled: false,
   pauseDim: false,
   panelCollapsed: false,
+  filterFolded: false,
+  autoFolded: false,
   panelLeft: null,
   panelTop: null,
   thresholds: {
@@ -150,6 +152,11 @@ TZ.DEFAULT_SETTINGS = {
     listedWithinValue: null,
     listedWithinUnit: "month",
     exclusions: {}
+  },
+  numericPresets: {
+    thresholds: [],
+    thresholdsB: [],
+    autoOpen: []
   },
   savedAt: null
 };

@@ -19,6 +19,12 @@ TZ.mergeSettings = function (saved) {
     base.autoOpen.exclusions,
     (saved.autoOpen && saved.autoOpen.exclusions) || {}
   );
+  const savedPresets = saved.numericPresets || {};
+  out.numericPresets = {
+    thresholds: Array.isArray(savedPresets.thresholds) ? savedPresets.thresholds : [],
+    thresholdsB: Array.isArray(savedPresets.thresholdsB) ? savedPresets.thresholdsB : [],
+    autoOpen: Array.isArray(savedPresets.autoOpen) ? savedPresets.autoOpen : []
+  };
   return out;
 };
 

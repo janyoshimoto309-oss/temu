@@ -27,6 +27,19 @@ TZ.panel = {
     this.root.classList.toggle("is-collapsed", !!this.settings.panelCollapsed);
     this._applyPos();
     this._applyPluginOn();
+    this._applyFolds();
+  },
+
+  _applyFolds: function () {
+    if (!this.root) return;
+    const filter = this._el("filterBlock");
+    if (filter) filter.classList.toggle("is-folded", !!this.settings.filterFolded);
+    const auto = this._el("autoBlock");
+    if (auto) auto.classList.toggle("is-folded", !!this.settings.autoFolded);
+    const foldFilter = this._el("foldFilterBtn");
+    if (foldFilter) foldFilter.textContent = this.settings.filterFolded ? "展开" : "收起";
+    const foldAuto = this._el("foldAutoBtn");
+    if (foldAuto) foldAuto.textContent = this.settings.autoFolded ? "展开" : "收起";
   },
 
   _applyPluginOn: function () {
@@ -123,6 +136,18 @@ TZ.panel = {
             </div>`;
   },
 
+  _presetBar: function (slot) {
+    return `
+            <div class="tz-preset" data-preset-slot="${slot}">
+              <select data-preset-list="${slot}"></select>
+              <button class="tz-btn ghost" type="button" data-act="presetApply" data-preset-slot="${slot}">填入</button>
+              <input type="text" data-preset-name="${slot}" placeholder="方案名称" maxlength="24">
+              <button class="tz-btn ghost" type="button" data-act="presetSave" data-preset-slot="${slot}">存当前</button>
+              <button class="tz-btn ghost" type="button" data-act="presetDel" data-preset-slot="${slot}">删除</button>
+            </div>
+            <div class="tz-muted" data-preset-msg="${slot}"></div>`;
+  },
+
   _html: function () {
     const ruleChecks = TZ.RULE_EXCLUSIONS.map(
       (r) =>
@@ -162,23 +187,31 @@ TZ.panel = {
           <label class="tz-check"><input type="checkbox" data-el="pauseDim"><span>暂时取消变灰</span></label>
         </div>
         <div class="tz-body">
-          <div class="tz-block">
+          <div class="tz-block" data-el="filterBlock">
             <div class="tz-block-title">
               筛选 <span class="hint">两套数字为或 · 品类命中即灰</span>
-              <button class="tz-btn primary" type="button" data-act="saveRules">保存规则</button>
+              <span class="tz-row">
+                <button class="tz-btn ghost" type="button" data-act="toggleFilterFold" data-el="foldFilterBtn">收起</button>
+                <button class="tz-btn ghost" type="button" data-act="clearFilter">清空</button>
+                <button class="tz-btn primary" type="button" data-act="saveRules">保存规则</button>
+              </span>
             </div>
+            <div class="tz-block-body">
             <div class="tz-muted" data-el="saveMeta" style="margin-bottom:8px">保存规则会连同自动点开的门槛、最多点开个数和间隔一起记住。</div>
             <label class="tz-check" style="margin-bottom:8px">
               <input type="checkbox" data-el="searchPageEnabled">
               <span>搜索页也筛选（默关）</span>
             </label>
             <div class="tz-pack-title">第一套数字</div>
+            ${this._presetBar("thresholds")}
             ${this._thresholdGrid("data-th", "data-th-unit")}
             <div class="tz-pack-title">第二套数字（过此套也可留下）</div>
+            ${this._presetBar("thresholdsB")}
             ${this._thresholdGrid("data-th-b", "data-th-b-unit")}
             <div class="tz-muted" style="margin:6px 0 8px">两套之间是「或」：过其中一套数字门槛即可留下。每套内部仍是「并且」。某套全空则该套不启用。页面上销量为「-」或空的，跳过该条。品类命中仍变灰，数字救不回来。</div>
             <div class="tz-block-title" style="margin-top:10px">不看 / 不做（规则）</div>
             <div class="tz-checks">${ruleChecks}</div>
+            </div>
           </div>
 
           <div class="tz-block">
@@ -196,10 +229,18 @@ TZ.panel = {
             <div class="tz-muted" style="margin-top:6px" data-el="aiStatus"></div>
           </div>
 
-          <div class="tz-block c-block">
-            <div class="tz-block-title">自动点开 <span class="hint">独立模块 C · 不参与变灰</span></div>
+          <div class="tz-block c-block" data-el="autoBlock">
+            <div class="tz-block-title">
+              自动点开 <span class="hint">独立模块 C · 不参与变灰</span>
+              <span class="tz-row">
+                <button class="tz-btn ghost" type="button" data-act="toggleAutoFold" data-el="foldAutoBtn">收起</button>
+                <button class="tz-btn ghost" type="button" data-act="clearAuto">清空筛选项</button>
+              </span>
+            </div>
+            <div class="tz-block-body">
             <label class="tz-check"><input type="checkbox" data-el="autoEnabled"><span>启用自动点开（默认关）</span></label>
             <div class="tz-muted" style="margin:8px 0 4px">下面几条只限制点谁，空=不限制，并且才点，不变灰。点上面「保存规则」会一起记住。</div>
+            ${this._presetBar("autoOpen")}
             <div class="tz-grid">
               <div class="tz-field"><label>只点日销 ≥</label><input type="number" min="0" data-el="autoDaily" placeholder="空=不限制"></div>
               <div class="tz-field"><label>只点月销 ≥</label><input type="number" min="0" data-el="autoMonthly" placeholder="空=不限制"></div>
@@ -228,6 +269,7 @@ TZ.panel = {
               <button class="tz-btn ghost" type="button" data-act="aoStop">停止</button>
             </div>
             <div class="tz-msg" data-el="aoMsg">关着时筛选只变灰，绝不跳转。</div>
+            </div>
           </div>
 
           <details class="tz-more">
@@ -265,7 +307,19 @@ TZ.panel = {
       else if (act === "saveRules") {
         this._readForm();
         this.saveNow(true);
-      }
+      } else if (act === "clearFilter") this._clearFilterFields();
+      else if (act === "clearAuto") this._clearAutoFields();
+      else if (act === "toggleFilterFold") {
+        this.settings.filterFolded = !this.settings.filterFolded;
+        this._applyFolds();
+        this._persist();
+      } else if (act === "toggleAutoFold") {
+        this.settings.autoFolded = !this.settings.autoFolded;
+        this._applyFolds();
+        this._persist();
+      } else if (act === "presetSave") this._presetSave(btn.getAttribute("data-preset-slot"));
+      else if (act === "presetApply") this._presetApply(btn.getAttribute("data-preset-slot"));
+      else if (act === "presetDel") this._presetDelete(btn.getAttribute("data-preset-slot"));
       else if (act === "aoStart") TZ.autoOpen.start(this.settings);
       else if (act === "aoPause") TZ.autoOpen.pause();
       else if (act === "aoStop") TZ.autoOpen.stop();
@@ -363,6 +417,35 @@ TZ.panel = {
     this._applyPos();
   },
 
+  _clearFilterFields: function () {
+    this.root.querySelectorAll("[data-th], [data-th-b]").forEach((input) => {
+      input.value = "";
+    });
+    const unit = this.root.querySelector("[data-th-unit]");
+    if (unit) unit.value = "month";
+    const unitB = this.root.querySelector("[data-th-b-unit]");
+    if (unitB) unitB.value = "month";
+    this.root.querySelectorAll("[data-ex]").forEach((box) => {
+      box.checked = false;
+    });
+    this._readForm();
+    this.saveNow(true);
+  },
+
+  _clearAutoFields: function () {
+    ["autoDaily", "autoMonthly", "autoRating", "autoReviews", "autoTemuSold", "autoListed"].forEach((name) => {
+      const el = this._el(name);
+      if (el) el.value = "";
+    });
+    const unit = this._el("autoListedUnit");
+    if (unit) unit.value = "month";
+    this.root.querySelectorAll("[data-ao-ex]").forEach((box) => {
+      box.checked = false;
+    });
+    this._readForm();
+    this.saveNow(true);
+  },
+
   _readForm: function () {
     const s = this.settings;
     s.searchPageEnabled = this._el("searchPageEnabled").checked;
@@ -448,6 +531,61 @@ TZ.panel = {
         : "保存规则会连同自动点开的门槛、最多点开个数和间隔一起记住。";
   },
 
+  _presetMsg: function (slot, text) {
+    const el = this.root.querySelector('[data-preset-msg="' + slot + '"]');
+    if (el) el.textContent = text || "";
+  },
+
+  _refreshPresetSelects: function (keep) {
+    if (!this.root || !TZ.presets) return;
+    ["thresholds", "thresholdsB", "autoOpen"].forEach((slot) => {
+      const sel = this.root.querySelector('[data-preset-list="' + slot + '"]');
+      TZ.presets.fillSelect(sel, this.settings, slot, keep && keep[slot]);
+    });
+  },
+
+  _presetSave: function (slot) {
+    if (!slot || !TZ.presets) return;
+    const input = this.root.querySelector('[data-preset-name="' + slot + '"]');
+    const name = input ? input.value : "";
+    const res = TZ.presets.save(this.settings, slot, name, TZ.presets.collect(this.root, slot));
+    if (!res.ok) {
+      this._presetMsg(slot, res.reason);
+      return;
+    }
+    this._refreshPresetSelects({ [slot]: res.id });
+    this._presetMsg(slot, res.replaced ? "已覆盖同名方案" : "已保存方案");
+    this._persist();
+  },
+
+  _presetApply: function (slot) {
+    if (!slot || !TZ.presets) return;
+    const sel = this.root.querySelector('[data-preset-list="' + slot + '"]');
+    const id = sel && sel.value;
+    const item = TZ.presets.find(this.settings, slot, id);
+    if (!item) {
+      this._presetMsg(slot, "请先选择已存方案");
+      return;
+    }
+    TZ.presets.apply(this.root, slot, item.data);
+    this._readForm();
+    this._presetMsg(slot, "已填入「" + item.name + "」");
+  },
+
+  _presetDelete: function (slot) {
+    if (!slot || !TZ.presets) return;
+    const sel = this.root.querySelector('[data-preset-list="' + slot + '"]');
+    const id = sel && sel.value;
+    if (!id) {
+      this._presetMsg(slot, "请先选择要删除的方案");
+      return;
+    }
+    TZ.presets.remove(this.settings, slot, id);
+    this._refreshPresetSelects();
+    this._presetMsg(slot, "已删除");
+    this._persist();
+  },
+
   _saveKey: async function () {
     const input = this._el("apiKey");
     const key = (input.value || "").trim();
@@ -463,6 +601,7 @@ TZ.panel = {
     this._applyCollapsed();
     this._applyPos();
     this._applyPluginOn();
+    this._applyFolds();
     this._el("searchPageEnabled").checked = !!settings.searchPageEnabled;
     this._el("pauseDim").checked = !!settings.pauseDim;
     this._el("aiEnabled").checked = !!(settings.ai && settings.ai.enabled);
@@ -513,6 +652,7 @@ TZ.panel = {
       box.checked = !!aoEx[box.getAttribute("data-ao-ex")];
     });
 
+    this._refreshPresetSelects();
     this.updateStatus();
     this.updateAutoOpen();
     this.updateSaveMeta(false);
