@@ -88,6 +88,17 @@ TZ.panel = {
     this._bind();
     this._bindDrag();
     this.sync(settings);
+    this._applyVersion();
+  },
+
+  _applyVersion: function () {
+    const el = this._el("verLine");
+    if (!el) return;
+    let v = "";
+    try {
+      v = (chrome.runtime.getManifest() || {}).version || "";
+    } catch (err) {}
+    el.textContent = v ? "v" + v : "";
   },
 
   _thresholdGrid: function (attr, unitAttr) {
@@ -117,6 +128,10 @@ TZ.panel = {
       (r) =>
         `<label class="tz-check"><input type="checkbox" data-ex="${r.id}"><span>${r.label}</span></label>`
     ).join("");
+    const aoChecks = TZ.RULE_EXCLUSIONS.map(
+      (r) =>
+        `<label class="tz-check"><input type="checkbox" data-ao-ex="${r.id}"><span>${r.label}</span></label>`
+    ).join("");
     const aiChecks = TZ.AI_EXCLUSIONS.map(
       (r) =>
         `<label class="tz-check"><input type="checkbox" data-ai-ex="${r.id}"><span>${r.label}</span></label>`
@@ -132,7 +147,7 @@ TZ.panel = {
         <header class="tz-head">
           <div>
             <div class="tz-title">Temu × 知了筛选</div>
-            <div class="tz-sub">v2.1.0 · 自动点开含 Temu 已售</div>
+            <div class="tz-sub" data-el="verLine"></div>
           </div>
           <div class="tz-head-actions">
             <label class="tz-power" title="插件总开关">
@@ -147,43 +162,12 @@ TZ.panel = {
           <label class="tz-check"><input type="checkbox" data-el="pauseDim"><span>暂时取消变灰</span></label>
         </div>
         <div class="tz-body">
-          <div class="tz-block c-block">
-            <div class="tz-block-title">自动点开 <span class="hint">独立模块 C · 不参与变灰</span></div>
-            <label class="tz-check"><input type="checkbox" data-el="autoEnabled"><span>启用自动点开（默认关）</span></label>
-            <div class="tz-muted" style="margin:8px 0 4px">下面几条只限制点谁，空=不限制，并且才点，不变灰。</div>
-            <div class="tz-grid">
-              <div class="tz-field"><label>只点日销 ≥</label><input type="number" min="0" data-el="autoDaily" placeholder="空=不限制"></div>
-              <div class="tz-field"><label>只点月销 ≥</label><input type="number" min="0" data-el="autoMonthly" placeholder="空=不限制"></div>
-              <div class="tz-field"><label>只点知了评分 ≥</label><input type="number" min="0" step="0.1" data-el="autoRating" placeholder="空=不限制"></div>
-              <div class="tz-field"><label>只点知了评论 ≥</label><input type="number" min="0" data-el="autoReviews" placeholder="空=不限制"></div>
-              <div class="tz-field span2"><label>只点 Temu 已售 ≥</label><input type="number" min="0" data-el="autoTemuSold" placeholder="空=不限制"></div>
-              <div class="tz-field span2">
-                <label>只点上架近 N（超过则不点）</label>
-                <div class="tz-row">
-                  <input type="number" min="0" data-el="autoListed" placeholder="空=不限制">
-                  <select data-el="autoListedUnit">
-                    <option value="month">个月</option>
-                    <option value="day">天</option>
-                  </select>
-                </div>
-              </div>
-              <div class="tz-field"><label>最多点开 N 个</label><input type="number" min="1" data-el="autoMax"></div>
-              <div class="tz-field"><label>两次间隔（秒）</label><input type="number" min="0.8" step="0.1" data-el="autoInterval"></div>
-            </div>
-            <div class="tz-row" style="margin-top:8px">
-              <button class="tz-btn primary" type="button" data-act="aoStart">开始</button>
-              <button class="tz-btn warn" type="button" data-act="aoPause">暂停</button>
-              <button class="tz-btn ghost" type="button" data-act="aoStop">停止</button>
-            </div>
-            <div class="tz-msg" data-el="aoMsg">关着时筛选只变灰，绝不跳转。</div>
-          </div>
-
           <div class="tz-block">
             <div class="tz-block-title">
               筛选 <span class="hint">两套数字为或 · 品类命中即灰</span>
               <button class="tz-btn primary" type="button" data-act="saveRules">保存规则</button>
             </div>
-            <div class="tz-muted" data-el="saveMeta" style="margin-bottom:8px">改完会自动记住，下次打开自动加载。也可点保存。</div>
+            <div class="tz-muted" data-el="saveMeta" style="margin-bottom:8px">保存规则会连同自动点开的门槛、最多点开个数和间隔一起记住。</div>
             <label class="tz-check" style="margin-bottom:8px">
               <input type="checkbox" data-el="searchPageEnabled">
               <span>搜索页也筛选（默关）</span>
@@ -210,6 +194,40 @@ TZ.panel = {
             </div>
             <div class="tz-checks">${aiChecks}</div>
             <div class="tz-muted" style="margin-top:6px" data-el="aiStatus"></div>
+          </div>
+
+          <div class="tz-block c-block">
+            <div class="tz-block-title">自动点开 <span class="hint">独立模块 C · 不参与变灰</span></div>
+            <label class="tz-check"><input type="checkbox" data-el="autoEnabled"><span>启用自动点开（默认关）</span></label>
+            <div class="tz-muted" style="margin:8px 0 4px">下面几条只限制点谁，空=不限制，并且才点，不变灰。点上面「保存规则」会一起记住。</div>
+            <div class="tz-grid">
+              <div class="tz-field"><label>只点日销 ≥</label><input type="number" min="0" data-el="autoDaily" placeholder="空=不限制"></div>
+              <div class="tz-field"><label>只点月销 ≥</label><input type="number" min="0" data-el="autoMonthly" placeholder="空=不限制"></div>
+              <div class="tz-field"><label>只点知了评分 ≥</label><input type="number" min="0" step="0.1" data-el="autoRating" placeholder="空=不限制"></div>
+              <div class="tz-field"><label>只点知了评论 ≥</label><input type="number" min="0" data-el="autoReviews" placeholder="空=不限制"></div>
+              <div class="tz-field span2"><label>只点 Temu 已售 ≥</label><input type="number" min="0" data-el="autoTemuSold" placeholder="空=不限制"></div>
+              <div class="tz-field span2">
+                <label>只点上架近 N（超过则不点）</label>
+                <div class="tz-row">
+                  <input type="number" min="0" data-el="autoListed" placeholder="空=不限制">
+                  <select data-el="autoListedUnit">
+                    <option value="month">个月</option>
+                    <option value="day">天</option>
+                  </select>
+                </div>
+              </div>
+              <div class="tz-field"><label>最多点开 N 个</label><input type="number" min="1" data-el="autoMax"></div>
+              <div class="tz-field"><label>两次间隔（秒）</label><input type="number" min="0.8" step="0.1" data-el="autoInterval"></div>
+            </div>
+            <div class="tz-block-title" style="margin-top:10px">不看 / 不做（只限制点开）</div>
+            <div class="tz-muted" style="margin:0 0 6px">勾选后命中则不点，规则与上面筛选相同，不变灰。「保存规则」会一起记住。</div>
+            <div class="tz-checks">${aoChecks}</div>
+            <div class="tz-row" style="margin-top:8px">
+              <button class="tz-btn primary" type="button" data-act="aoStart">开始</button>
+              <button class="tz-btn warn" type="button" data-act="aoPause">暂停</button>
+              <button class="tz-btn ghost" type="button" data-act="aoStop">停止</button>
+            </div>
+            <div class="tz-msg" data-el="aoMsg">关着时筛选只变灰，绝不跳转。</div>
           </div>
 
           <details class="tz-more">
@@ -244,7 +262,10 @@ TZ.panel = {
         this._applyCollapsed();
         this._persist();
       } else if (act === "saveKey") this._saveKey();
-      else if (act === "saveRules") this.saveNow(true);
+      else if (act === "saveRules") {
+        this._readForm();
+        this.saveNow(true);
+      }
       else if (act === "aoStart") TZ.autoOpen.start(this.settings);
       else if (act === "aoPause") TZ.autoOpen.pause();
       else if (act === "aoStop") TZ.autoOpen.stop();
@@ -388,6 +409,10 @@ TZ.panel = {
     this.root.querySelectorAll("[data-ai-ex]").forEach((box) => {
       s.aiExclusions[box.getAttribute("data-ai-ex")] = box.checked;
     });
+    if (!s.autoOpen.exclusions) s.autoOpen.exclusions = {};
+    this.root.querySelectorAll("[data-ao-ex]").forEach((box) => {
+      s.autoOpen.exclusions[box.getAttribute("data-ao-ex")] = box.checked;
+    });
 
     this._persist();
     TZ.filter.run(s);
@@ -417,10 +442,10 @@ TZ.panel = {
     const ts = this.settings && this.settings.savedAt;
     const time = ts ? new Date(ts).toLocaleString() : "";
     el.textContent = manual
-      ? "已保存，下次打开 Temu 会自动加载。" + (time ? "（" + time + "）" : "")
+      ? "已保存筛选和自动点开设置，下次打开 Temu 会自动加载。" + (time ? "（" + time + "）" : "")
       : time
         ? "已自动记住当前规则（" + time + "）"
-        : "改完会自动记住，下次打开自动加载。也可点保存。";
+        : "保存规则会连同自动点开的门槛、最多点开个数和间隔一起记住。";
   },
 
   _saveKey: async function () {
@@ -482,6 +507,10 @@ TZ.panel = {
     });
     this.root.querySelectorAll("[data-ai-ex]").forEach((box) => {
       box.checked = !!(settings.aiExclusions && settings.aiExclusions[box.getAttribute("data-ai-ex")]);
+    });
+    const aoEx = (settings.autoOpen && settings.autoOpen.exclusions) || {};
+    this.root.querySelectorAll("[data-ao-ex]").forEach((box) => {
+      box.checked = !!aoEx[box.getAttribute("data-ao-ex")];
     });
 
     this.updateStatus();

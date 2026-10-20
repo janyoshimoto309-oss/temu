@@ -14,6 +14,11 @@ TZ.mergeSettings = function (saved) {
   out.aiExclusions = Object.assign({}, saved.aiExclusions || {});
   out.ai = Object.assign(base.ai, saved.ai || {});
   out.autoOpen = Object.assign(base.autoOpen, saved.autoOpen || {});
+  out.autoOpen.exclusions = Object.assign(
+    {},
+    base.autoOpen.exclusions,
+    (saved.autoOpen && saved.autoOpen.exclusions) || {}
+  );
   return out;
 };
 

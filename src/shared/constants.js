@@ -148,7 +148,8 @@ TZ.DEFAULT_SETTINGS = {
     reviewMin: null,
     temuSoldMin: null,
     listedWithinValue: null,
-    listedWithinUnit: "month"
+    listedWithinUnit: "month",
+    exclusions: {}
   },
   savedAt: null
 };

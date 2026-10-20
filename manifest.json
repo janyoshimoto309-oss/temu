@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Temu × 知了筛选",
-  "version": "2.1.0",
+  "version": "2.2.1",
   "description": "只读 Temu 列表与知了蓝框，按门槛和不看/不做名单把不合格商品卡变灰；自动点开为独立模块。",
   "minimum_chrome_version": "114",
   "icons": {

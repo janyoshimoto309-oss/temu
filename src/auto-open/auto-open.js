@@ -165,7 +165,8 @@ TZ.autoOpen = {
       listedWithinValue: ao.listedWithinValue,
       listedWithinUnit: ao.listedWithinUnit
     });
-    return !reasons.length;
+    const excluded = TZ.exclusionReasons(parsed, { exclusions: ao.exclusions });
+    return !reasons.length && !excluded.length;
   },
 
   _nextCard: function (settings) {
