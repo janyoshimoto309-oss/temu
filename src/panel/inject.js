@@ -114,7 +114,7 @@ TZ.panel = {
     el.textContent = v ? "v" + v : "";
   },
 
-  _thresholdGrid: function (attr, unitAttr) {
+  _thresholdGrid: function (attr) {
     return `
             <div class="tz-grid">
               <div class="tz-field"><label>知了日销 ≥</label><input type="number" min="0" ${attr}="dailySalesMin" placeholder="空=不启用"></div>
@@ -124,14 +124,8 @@ TZ.panel = {
               <div class="tz-field"><label>知了评分 ≥</label><input type="number" min="0" step="0.1" ${attr}="ratingMin" placeholder="空=不启用"></div>
               <div class="tz-field"><label>知了评论 ≥</label><input type="number" min="0" ${attr}="reviewMin" placeholder="空=不启用"></div>
               <div class="tz-field span2">
-                <label>上架超过此时长就变灰（近 N）</label>
-                <div class="tz-row">
-                  <input type="number" min="0" ${attr}="listedWithinValue" placeholder="空=不启用">
-                  <select ${unitAttr}="listedWithinUnit">
-                    <option value="month">个月</option>
-                    <option value="day">天</option>
-                  </select>
-                </div>
+                <label>上架超过此时长就变灰（近 N 个月）</label>
+                <input type="number" min="0" ${attr}="listedWithinValue" placeholder="空=不启用">
               </div>
             </div>`;
   },
@@ -153,14 +147,18 @@ TZ.panel = {
   },
 
   _html: function () {
-    const ruleChecks = TZ.RULE_EXCLUSIONS.map(
-      (r) =>
-        `<label class="tz-check"><input type="checkbox" data-ex="${r.id}"><span>${r.label}</span></label>`
-    ).join("");
-    const aoChecks = TZ.RULE_EXCLUSIONS.map(
-      (r) =>
-        `<label class="tz-check"><input type="checkbox" data-ao-ex="${r.id}"><span>${r.label}</span></label>`
-    ).join("");
+    const ruleChecks = TZ.RULE_EXCLUSIONS.filter((r) => r.special !== "pcs")
+      .map(
+        (r) =>
+          `<label class="tz-check"><input type="checkbox" data-ex="${r.id}"><span>${r.label}</span></label>`
+      )
+      .join("");
+    const aoChecks = TZ.RULE_EXCLUSIONS.filter((r) => r.special !== "pcs")
+      .map(
+        (r) =>
+          `<label class="tz-check"><input type="checkbox" data-ao-ex="${r.id}"><span>${r.label}</span></label>`
+      )
+      .join("");
     const aiChecks = TZ.AI_EXCLUSIONS.map(
       (r) =>
         `<label class="tz-check"><input type="checkbox" data-ai-ex="${r.id}"><span>${r.label}</span></label>`
@@ -173,6 +171,7 @@ TZ.panel = {
         <span class="tz-dock-count" data-el="dockCount">0</span>
       </div>
       <section class="tz-panel">
+        <div class="tz-chrome">
         <header class="tz-head">
           <div>
             <div class="tz-title">Temu × 知了筛选</div>
@@ -188,7 +187,11 @@ TZ.panel = {
         </header>
         <div class="tz-status">
           <span>已标灰 <b class="tz-pill" data-el="dimCount">0</b></span>
-          <label class="tz-check"><input type="checkbox" data-el="pauseDim"><span>暂时取消变灰</span></label>
+          <span class="tz-actions">
+            <button class="tz-btn primary" type="button" data-act="saveRules">保存规则</button>
+            <label class="tz-check"><input type="checkbox" data-el="pauseDim"><span>暂时取消变灰</span></label>
+          </span>
+        </div>
         </div>
         <div class="tz-body">
           <div class="tz-block" data-el="filterBlock">
@@ -200,7 +203,6 @@ TZ.panel = {
               <span class="tz-actions">
                 <button class="tz-btn ghost" type="button" data-act="toggleFilterFold" data-el="foldFilterBtn">收起</button>
                 <button class="tz-btn ghost" type="button" data-act="clearFilter">清空</button>
-                <button class="tz-btn primary" type="button" data-act="saveRules">保存规则</button>
               </span>
             </div>
             <div class="tz-block-body">
@@ -212,17 +214,21 @@ TZ.panel = {
             <div class="tz-pack">
               <div class="tz-pack-title">第一套数字</div>
               ${this._presetBar("thresholds")}
-              ${this._thresholdGrid("data-th", "data-th-unit")}
+              ${this._thresholdGrid("data-th")}
             </div>
             <div class="tz-pack">
               <div class="tz-pack-title">第二套数字（过此套也可留下）</div>
               ${this._presetBar("thresholdsB")}
-              ${this._thresholdGrid("data-th-b", "data-th-b-unit")}
+              ${this._thresholdGrid("data-th-b")}
             </div>
             <div class="tz-muted">两套之间是「或」：过其中一套数字门槛即可留下。每套内部仍是「并且」。某套全空则该套不启用。页面上销量为「-」或空的，跳过该条。品类命中仍变灰，数字救不回来。</div>
             <div class="tz-block-title tz-subhead">
               <div class="tz-block-heading">不看 / 不做（规则）</div>
               <button class="tz-btn ghost" type="button" data-act="checkAllEx">全选</button>
+            </div>
+            <div class="tz-field">
+              <label>套装件数 &gt;（个 / 件 / pcs）</label>
+              <input type="number" min="0" data-el="pcsOver" placeholder="空=不启用">
             </div>
             <div class="tz-checks">${ruleChecks}</div>
             </div>
@@ -260,8 +266,7 @@ TZ.panel = {
               </span>
             </div>
             <div class="tz-block-body">
-            <label class="tz-check lead"><input type="checkbox" data-el="autoEnabled"><span>启用自动点开（默认关）</span></label>
-            <div class="tz-muted">下面几条只限制点谁，空=不限制，并且才点，不变灰。点上面「保存规则」会一起记住。</div>
+            <div class="tz-muted">点「开始」才跳转，刷新后不会自己点。下面几条只限制点谁，空=不限制，并且才点，不变灰。「保存规则」会一起记住。</div>
             ${this._presetBar("autoOpen")}
             <div class="tz-grid">
               <div class="tz-field"><label>只点日销 ≥</label><input type="number" min="0" data-el="autoDaily" placeholder="空=不限制"></div>
@@ -270,14 +275,8 @@ TZ.panel = {
               <div class="tz-field"><label>只点知了评论 ≥</label><input type="number" min="0" data-el="autoReviews" placeholder="空=不限制"></div>
               <div class="tz-field span2"><label>只点 Temu 已售 ≥</label><input type="number" min="0" data-el="autoTemuSold" placeholder="空=不限制"></div>
               <div class="tz-field span2">
-                <label>只点上架近 N（超过则不点）</label>
-                <div class="tz-row">
-                  <input type="number" min="0" data-el="autoListed" placeholder="空=不限制">
-                  <select data-el="autoListedUnit">
-                    <option value="month">个月</option>
-                    <option value="day">天</option>
-                  </select>
-                </div>
+                <label>只点上架近 N 个月（超过则不点）</label>
+                <input type="number" min="0" data-el="autoListed" placeholder="空=不限制">
               </div>
               <div class="tz-field"><label>最多点开 N 个</label><input type="number" min="1" data-el="autoMax"></div>
               <div class="tz-field"><label>两次间隔（秒）</label><input type="number" min="0.8" step="0.1" data-el="autoInterval"></div>
@@ -287,13 +286,16 @@ TZ.panel = {
               <button class="tz-btn ghost" type="button" data-act="checkAllAoEx">全选</button>
             </div>
             <div class="tz-muted">勾选后命中则不点，规则与上面筛选相同，不变灰。「保存规则」会一起记住。</div>
+            <div class="tz-field">
+              <label>套装件数 &gt;（个 / 件 / pcs）</label>
+              <input type="number" min="0" data-el="autoPcsOver" placeholder="空=不限制">
+            </div>
             <div class="tz-checks">${aoChecks}</div>
             <div class="tz-actions footer">
               <button class="tz-btn primary" type="button" data-act="aoStart">开始</button>
-              <button class="tz-btn warn" type="button" data-act="aoPause">暂停</button>
               <button class="tz-btn ghost" type="button" data-act="aoStop">停止</button>
             </div>
-            <div class="tz-msg" data-el="aoMsg">关着时筛选只变灰，绝不跳转。</div>
+            <div class="tz-msg" data-el="aoMsg">没点开始时筛选只变灰，绝不跳转。</div>
             </div>
           </div>
         </div>
@@ -343,7 +345,6 @@ TZ.panel = {
       else if (act === "checkAllEx") this._checkAll("[data-ex]");
       else if (act === "checkAllAoEx") this._checkAll("[data-ao-ex]");
       else if (act === "aoStart") TZ.autoOpen.start(this.settings);
-      else if (act === "aoPause") TZ.autoOpen.pause();
       else if (act === "aoStop") TZ.autoOpen.stop();
       this.updateAutoOpen();
     });
@@ -450,24 +451,20 @@ TZ.panel = {
     this.root.querySelectorAll("[data-th], [data-th-b]").forEach((input) => {
       input.value = "";
     });
-    const unit = this.root.querySelector("[data-th-unit]");
-    if (unit) unit.value = "month";
-    const unitB = this.root.querySelector("[data-th-b-unit]");
-    if (unitB) unitB.value = "month";
     this.root.querySelectorAll("[data-ex]").forEach((box) => {
       box.checked = false;
     });
+    const pcsOver = this._el("pcsOver");
+    if (pcsOver) pcsOver.value = "";
     this._readForm();
     this.saveNow(true);
   },
 
   _clearAutoFields: function () {
-    ["autoDaily", "autoMonthly", "autoRating", "autoReviews", "autoTemuSold", "autoListed"].forEach((name) => {
+    ["autoDaily", "autoMonthly", "autoRating", "autoReviews", "autoTemuSold", "autoListed", "autoPcsOver"].forEach((name) => {
       const el = this._el(name);
       if (el) el.value = "";
     });
-    const unit = this._el("autoListedUnit");
-    if (unit) unit.value = "month";
     this.root.querySelectorAll("[data-ao-ex]").forEach((box) => {
       box.checked = false;
     });
@@ -480,7 +477,6 @@ TZ.panel = {
     s.searchPageEnabled = this._el("searchPageEnabled").checked;
     s.pauseDim = this._el("pauseDim").checked;
     s.ai.enabled = this._el("aiEnabled").checked;
-    s.autoOpen.enabled = this._el("autoEnabled").checked;
     s.autoOpen.maxCount = TZ.emptyNum(this._el("autoMax").value) || 10;
     s.autoOpen.intervalSec = TZ.emptyNum(this._el("autoInterval").value) || 2.5;
     const autoDaily = this._el("autoDaily");
@@ -495,23 +491,24 @@ TZ.panel = {
     if (autoReviews) s.autoOpen.reviewMin = TZ.emptyNum(autoReviews.value);
     if (autoTemuSold) s.autoOpen.temuSoldMin = TZ.emptyNum(autoTemuSold.value);
     if (autoListed) s.autoOpen.listedWithinValue = TZ.emptyNum(autoListed.value);
-    const autoListedUnit = this._el("autoListedUnit");
-    if (autoListedUnit) s.autoOpen.listedWithinUnit = autoListedUnit.value || "month";
+    s.autoOpen.listedWithinUnit = "month";
+    const autoPcsOver = this._el("autoPcsOver");
+    if (autoPcsOver) s.autoOpen.pcsOver = TZ.emptyNum(autoPcsOver.value);
+    const pcsOver = this._el("pcsOver");
+    if (pcsOver) s.pcsOver = TZ.emptyNum(pcsOver.value);
 
     const th = s.thresholds;
     this.root.querySelectorAll("[data-th]").forEach((input) => {
       th[input.getAttribute("data-th")] = TZ.emptyNum(input.value);
     });
-    const unit = this.root.querySelector("[data-th-unit]");
-    if (unit) th.listedWithinUnit = unit.value;
+    th.listedWithinUnit = "month";
 
     if (!s.thresholdsB) s.thresholdsB = {};
     const thB = s.thresholdsB;
     this.root.querySelectorAll("[data-th-b]").forEach((input) => {
       thB[input.getAttribute("data-th-b")] = TZ.emptyNum(input.value);
     });
-    const unitB = this.root.querySelector("[data-th-b-unit]");
-    if (unitB) thB.listedWithinUnit = unitB.value;
+    thB.listedWithinUnit = "month";
 
     s.exclusions = {};
     this.root.querySelectorAll("[data-ex]").forEach((box) => {
@@ -634,7 +631,6 @@ TZ.panel = {
     this._el("searchPageEnabled").checked = !!settings.searchPageEnabled;
     this._el("pauseDim").checked = !!settings.pauseDim;
     this._el("aiEnabled").checked = !!(settings.ai && settings.ai.enabled);
-    this._el("autoEnabled").checked = !!(settings.autoOpen && settings.autoOpen.enabled);
     this._el("autoMax").value = settings.autoOpen.maxCount;
     this._el("autoInterval").value = settings.autoOpen.intervalSec;
     const autoDaily = this._el("autoDaily");
@@ -649,8 +645,6 @@ TZ.panel = {
     if (autoTemuSold) autoTemuSold.value = settings.autoOpen.temuSoldMin == null ? "" : settings.autoOpen.temuSoldMin;
     const autoListed = this._el("autoListed");
     if (autoListed) autoListed.value = settings.autoOpen.listedWithinValue == null ? "" : settings.autoOpen.listedWithinValue;
-    const autoListedUnit = this._el("autoListedUnit");
-    if (autoListedUnit) autoListedUnit.value = settings.autoOpen.listedWithinUnit || "month";
 
     const th = settings.thresholds || {};
     this.root.querySelectorAll("[data-th]").forEach((input) => {
@@ -658,8 +652,6 @@ TZ.panel = {
       const v = th[key];
       input.value = v == null ? "" : v;
     });
-    const unit = this.root.querySelector("[data-th-unit]");
-    if (unit) unit.value = th.listedWithinUnit || "month";
 
     const thB = settings.thresholdsB || {};
     this.root.querySelectorAll("[data-th-b]").forEach((input) => {
@@ -667,8 +659,14 @@ TZ.panel = {
       const v = thB[key];
       input.value = v == null ? "" : v;
     });
-    const unitB = this.root.querySelector("[data-th-b-unit]");
-    if (unitB) unitB.value = thB.listedWithinUnit || "month";
+
+    const pcsOverEl = this._el("pcsOver");
+    if (pcsOverEl) pcsOverEl.value = settings.pcsOver == null ? "" : settings.pcsOver;
+    const autoPcsOverEl = this._el("autoPcsOver");
+    if (autoPcsOverEl) {
+      const aoP = settings.autoOpen && settings.autoOpen.pcsOver;
+      autoPcsOverEl.value = aoP == null ? "" : aoP;
+    }
 
     this.root.querySelectorAll("[data-ex]").forEach((box) => {
       box.checked = !!(settings.exclusions && settings.exclusions[box.getAttribute("data-ex")]);

@@ -32,6 +32,7 @@ function settings(over) {
   if (over && over.thresholds) Object.assign(s.thresholds, over.thresholds);
   if (over && over.thresholdsB) Object.assign(s.thresholdsB, over.thresholdsB);
   if (over && over.exclusions) s.exclusions = over.exclusions;
+  if (over && over.pcsOver != null) s.pcsOver = over.pcsOver;
   return s;
 }
 
@@ -150,6 +151,20 @@ v = T.evaluateRules(
   settings({ exclusions: { brandLabel: true } })
 );
 eq("title 品牌 without chip does not dim", v.dim, false);
+
+eq("pcs 24pcs", T.parsePcsCount("24pcs flower"), 24);
+eq("pcs 件", T.parsePcsCount("50件套装"), 50);
+eq("pcs 个", T.parsePcsCount("30个装"), 30);
+eq("pcs skip 个月", T.parsePcsCount("上架3个月"), null);
+
+v = T.evaluateRules(card({}, { title: "24pcs set", pcs: 24 }), settings({ pcsOver: 20 }));
+eq("pcs over dims", v.dim, true);
+
+v = T.evaluateRules(card({}, { title: "10pcs set", pcs: 10 }), settings({ pcsOver: 20 }));
+eq("pcs under does not dim", v.dim, false);
+
+v = T.evaluateRules(card({}, { title: "24pcs set", pcs: 24 }), settings({}));
+eq("pcs empty off", v.dim, false);
 
 if (fail) {
   console.log("RULES_FAIL", fail);

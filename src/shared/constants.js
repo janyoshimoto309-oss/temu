@@ -63,9 +63,9 @@ TZ.RULE_EXCLUSIONS = [
   },
   {
     id: "toysKids",
-    label: "玩具 / 儿童",
-    category: ["玩具", "儿童", "婴童", "童装", "母婴", "kids", "baby"],
-    title: ["玩具", "儿童", "婴儿", "童", "kids", "baby", "toddler", "infant", "toy"]
+    label: "儿童",
+    category: ["儿童", "婴童", "童装", "母婴", "kids", "baby"],
+    title: ["儿童", "婴儿", "童", "kids", "baby", "toddler", "infant"]
   },
   {
     id: "print3d",
@@ -97,8 +97,52 @@ TZ.RULE_EXCLUSIONS = [
   {
     id: "electric",
     label: "带电",
-    category: ["带电", "锂电池"],
-    title: ["带电", "锂电池", "锂电", "充电电池", "battery pack", "lithium", "插头"]
+    category: [
+      "带电",
+      "锂电池",
+      "充电",
+      "电池",
+      "电器",
+      "电子",
+      "电动",
+      "电源",
+      "数码",
+      "小家电",
+      "灯具",
+      "照明",
+      "音箱",
+      "耳机"
+    ],
+    title: [
+      "带电",
+      "充电",
+      "充电器",
+      "充电宝",
+      "充电线",
+      "无线充",
+      "电池",
+      "锂电池",
+      "锂电",
+      "蓄电池",
+      "干电池",
+      "纽扣电池",
+      "插头",
+      "插座",
+      "电源",
+      "电动",
+      "电器",
+      "usb",
+      "type-c",
+      "type c",
+      "battery",
+      "rechargeable",
+      "lithium",
+      "electric",
+      "powered",
+      "led light",
+      "earbuds",
+      "headphone"
+    ]
   }
 ];
 
@@ -139,6 +183,7 @@ TZ.DEFAULT_SETTINGS = {
     temuSoldMin: null
   },
   exclusions: {},
+  pcsOver: null,
   aiExclusions: {},
   ai: {
     enabled: false,
@@ -155,6 +200,7 @@ TZ.DEFAULT_SETTINGS = {
     temuSoldMin: null,
     listedWithinValue: null,
     listedWithinUnit: "month",
+    pcsOver: null,
     exclusions: {}
   },
   numericPresets: {

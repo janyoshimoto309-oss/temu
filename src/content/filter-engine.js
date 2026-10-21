@@ -70,13 +70,15 @@ TZ.exclusionReasons = function (parsed, settings) {
   const hasZ = !!z.present;
   const enabled = (settings && settings.exclusions) || {};
   TZ.RULE_EXCLUSIONS.forEach((rule) => {
-    if (!enabled[rule.id]) return;
     if (rule.special === "pcs") {
-      if (parsed.pcs != null && parsed.pcs > 20) {
-        reasons.push("套装件数 " + parsed.pcs + "pcs > 20");
+      const limit = TZ.emptyNum(settings && settings.pcsOver);
+      if (limit == null) return;
+      if (parsed.pcs != null && parsed.pcs > limit) {
+        reasons.push("套装件数 " + parsed.pcs + " > " + limit);
       }
       return;
     }
+    if (!enabled[rule.id]) return;
     if (rule.special === "customBadge") {
       if (
         (parsed && parsed.hasCustomBadge) ||

@@ -11,6 +11,7 @@ TZ.mergeSettings = function (saved) {
   out.thresholds = Object.assign(base.thresholds, saved.thresholds || {});
   out.thresholdsB = Object.assign(base.thresholdsB, saved.thresholdsB || {});
   out.exclusions = Object.assign({}, saved.exclusions || {});
+  if (out.pcsOver == null && out.exclusions.over20pcs) out.pcsOver = 20;
   out.aiExclusions = Object.assign({}, saved.aiExclusions || {});
   out.ai = Object.assign(base.ai, saved.ai || {});
   out.autoOpen = Object.assign(base.autoOpen, saved.autoOpen || {});
@@ -19,6 +20,7 @@ TZ.mergeSettings = function (saved) {
     base.autoOpen.exclusions,
     (saved.autoOpen && saved.autoOpen.exclusions) || {}
   );
+  if (out.autoOpen.pcsOver == null && out.autoOpen.exclusions.over20pcs) out.autoOpen.pcsOver = 20;
   const savedPresets = saved.numericPresets || {};
   out.numericPresets = {
     thresholds: Array.isArray(savedPresets.thresholds) ? savedPresets.thresholds : [],

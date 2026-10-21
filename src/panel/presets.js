@@ -48,22 +48,19 @@ TZ.presets = {
     const data = {};
     if (slot === "autoOpen") {
       this.AO_KEYS.forEach((key) => {
-        const el = root.querySelector('[data-el="' + this.AO_EL[key] + '"]');
-        if (!el) {
-          data[key] = key === "listedWithinUnit" ? "month" : null;
+        if (key === "listedWithinUnit") {
+          data[key] = "month";
           return;
         }
-        if (key === "listedWithinUnit") data[key] = el.value || "month";
-        else data[key] = TZ.emptyNum(el.value);
+        const el = root.querySelector('[data-el="' + this.AO_EL[key] + '"]');
+        data[key] = el ? TZ.emptyNum(el.value) : null;
       });
       return data;
     }
     const numAttr = slot === "thresholdsB" ? "data-th-b" : "data-th";
-    const unitSel = slot === "thresholdsB" ? "[data-th-b-unit]" : "[data-th-unit]";
     this.TH_KEYS.forEach((key) => {
       if (key === "listedWithinUnit") {
-        const unit = root.querySelector(unitSel);
-        data[key] = unit && unit.value ? unit.value : "month";
+        data[key] = "month";
         return;
       }
       const input = root.querySelector("[" + numAttr + '="' + key + '"]');
@@ -76,21 +73,15 @@ TZ.presets = {
     if (!data) return false;
     if (slot === "autoOpen") {
       this.AO_KEYS.forEach((key) => {
+        if (key === "listedWithinUnit") return;
         const el = root.querySelector('[data-el="' + this.AO_EL[key] + '"]');
-        if (!el) return;
-        if (key === "listedWithinUnit") el.value = data[key] || "month";
-        else el.value = data[key] == null ? "" : data[key];
+        if (el) el.value = data[key] == null ? "" : data[key];
       });
       return true;
     }
     const numAttr = slot === "thresholdsB" ? "data-th-b" : "data-th";
-    const unitSel = slot === "thresholdsB" ? "[data-th-b-unit]" : "[data-th-unit]";
     this.TH_KEYS.forEach((key) => {
-      if (key === "listedWithinUnit") {
-        const unit = root.querySelector(unitSel);
-        if (unit) unit.value = data[key] || "month";
-        return;
-      }
+      if (key === "listedWithinUnit") return;
       const input = root.querySelector("[" + numAttr + '="' + key + '"]');
       if (input) input.value = data[key] == null ? "" : data[key];
     });

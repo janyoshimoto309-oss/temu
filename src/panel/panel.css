@@ -88,10 +88,14 @@
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
 }
 
-.tz-head {
+.tz-chrome {
   position: sticky;
   top: 0;
-  z-index: 2;
+  z-index: 4;
+  background: var(--tz-bg-2);
+}
+
+.tz-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -383,13 +387,23 @@
 .tz-row {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 6px;
+  min-width: 0;
 }
 
-.tz-row input {
-  flex: 1;
+.tz-row input,
+.tz-field .tz-row input {
+  flex: 1 1 auto;
   min-width: 0;
+  width: auto;
+}
+
+.tz-row select,
+.tz-field .tz-row select {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 4.5em;
 }
 
 .tz-actions {

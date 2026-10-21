@@ -17,8 +17,8 @@ TZ.autoOpen = {
     if (!TZ.isPluginOn(settings)) {
       return { ok: false, reason: "插件总开关已关闭" };
     }
-    if (!settings || !settings.autoOpen || !settings.autoOpen.enabled) {
-      return { ok: false, reason: "请先打开「启用自动点开」" };
+    if (!settings || !settings.autoOpen) {
+      return { ok: false, reason: "自动点开设置还没加载" };
     }
     if (!TZ.dimmer.hasFilterMarks()) {
       return { ok: false, reason: "还没有筛选标记。请先用筛选侧跑一遍，避免未筛选时乱点全站。" };
@@ -69,7 +69,7 @@ TZ.autoOpen = {
 
   _tick: async function (settings) {
     if (!this.running || this.paused) return;
-    if (!TZ.isPluginOn(settings) || !settings.autoOpen || !settings.autoOpen.enabled) {
+    if (!TZ.isPluginOn(settings) || !settings.autoOpen) {
       this.stop();
       return;
     }
@@ -165,7 +165,7 @@ TZ.autoOpen = {
       listedWithinValue: ao.listedWithinValue,
       listedWithinUnit: ao.listedWithinUnit
     });
-    const excluded = TZ.exclusionReasons(parsed, { exclusions: ao.exclusions });
+    const excluded = TZ.exclusionReasons(parsed, { exclusions: ao.exclusions, pcsOver: ao.pcsOver });
     return !reasons.length && !excluded.length;
   },
 

@@ -314,9 +314,14 @@ TZ.parseTemuSold = function (text) {
 
 TZ.parsePcsCount = function (title) {
   if (!title) return null;
-  const m = String(title).match(/(\d+)\s*pcs\b/i);
-  if (!m) return null;
-  return parseInt(m[1], 10);
+  const s = TZ.normalizeDigits(title);
+  const pcs = s.match(/(\d+)\s*pcs\b/i);
+  if (pcs) return parseInt(pcs[1], 10);
+  const jian = s.match(/(\d+)\s*件/);
+  if (jian) return parseInt(jian[1], 10);
+  const ge = s.match(/(\d+)\s*个(?!月)/);
+  if (ge) return parseInt(ge[1], 10);
+  return null;
 };
 
 TZ.innerTextSkip = function (root, skipEl) {
