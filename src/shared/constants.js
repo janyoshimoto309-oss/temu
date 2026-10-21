@@ -34,8 +34,58 @@ TZ.RULE_EXCLUSIONS = [
   {
     id: "clothing",
     label: "服装 / 饰品",
-    category: ["服装", "衣服", "服饰", "女装", "男装", "内衣", "睡衣", "袜子", "饰品", "首饰", "项链", "耳环", "戒指", "手链", "手镯"],
-    title: ["服装", "衣服", "连衣裙", "内衣", "内裤", "文胸", "袜子", "饰品", "项链", "耳环", "T恤", "t-shirt", "dress", "apparel", "jewelry"]
+    special: "clothing",
+    category: [
+      "服装",
+      "衣服",
+      "服饰",
+      "女装",
+      "男装",
+      "内衣",
+      "睡衣",
+      "家居服",
+      "睡裙",
+      "袜子",
+      "饰品",
+      "首饰",
+      "项链",
+      "耳环",
+      "戒指",
+      "手链",
+      "手镯",
+      "lingerie",
+      "sleepwear",
+      "loungewear"
+    ],
+    title: [
+      "服装",
+      "衣服",
+      "连衣裙",
+      "内衣",
+      "内裤",
+      "文胸",
+      "睡衣",
+      "家居服",
+      "睡裙",
+      "袜子",
+      "饰品",
+      "项链",
+      "耳环",
+      "圆领",
+      "吊带",
+      "露背",
+      "T恤",
+      "t-shirt",
+      "dress",
+      "apparel",
+      "jewelry",
+      "lingerie",
+      "pajama",
+      "sleepwear",
+      "loungewear",
+      "romper",
+      "bodysuit"
+    ]
   },
   {
     id: "bags",
@@ -52,8 +102,31 @@ TZ.RULE_EXCLUSIONS = [
   {
     id: "pen",
     label: "笔",
-    category: ["笔", "书写", "文具笔"],
-    title: ["圆珠笔", "钢笔", "铅笔", "中性笔", "马克笔", "水彩笔", "gel pen", "ballpoint"]
+    special: "pen",
+    category: ["笔", "书写", "文具笔", "彩笔", "蜡笔", "画笔"],
+    title: [
+      "圆珠笔",
+      "钢笔",
+      "铅笔",
+      "中性笔",
+      "马克笔",
+      "水彩笔",
+      "蜡笔",
+      "彩笔",
+      "画笔",
+      "荧光笔",
+      "记号笔",
+      "勾线笔",
+      "油性笔",
+      "水性笔",
+      "签字笔",
+      "白板笔",
+      "gel pen",
+      "ballpoint",
+      "crayon",
+      "highlighter",
+      "marker"
+    ]
   },
   {
     id: "massage",
@@ -64,8 +137,9 @@ TZ.RULE_EXCLUSIONS = [
   {
     id: "toysKids",
     label: "儿童",
+    special: "kids",
     category: ["儿童", "婴童", "童装", "母婴", "kids", "baby"],
-    title: ["儿童", "婴儿", "童", "kids", "baby", "toddler", "infant"]
+    title: ["儿童", "婴儿", "童", "幼儿", "婴幼儿", "kids", "baby", "toddler", "infant"]
   },
   {
     id: "print3d",
@@ -96,8 +170,28 @@ TZ.RULE_EXCLUSIONS = [
   {
     id: "knife",
     label: "刀",
-    category: ["刀", "刀具", "刀具刀"],
-    title: ["菜刀", "水果刀", "刀具", "折叠刀", "knife", "knives", "machete", "dagger", "blade"]
+    special: "knife",
+    category: ["刀", "刀具", "刀片", "剪刀"],
+    title: [
+      "菜刀",
+      "水果刀",
+      "刀具",
+      "折叠刀",
+      "美工刀",
+      "开箱刀",
+      "裁纸刀",
+      "壁纸刀",
+      "刀片",
+      "剪刀",
+      "knife",
+      "knives",
+      "machete",
+      "dagger",
+      "blade",
+      "cutter",
+      "box cutter",
+      "utility knife"
+    ]
   },
   {
     id: "electric",
@@ -152,7 +246,8 @@ TZ.RULE_EXCLUSIONS = [
   {
     id: "liquid",
     label: "液体",
-    category: ["液体", "液态", "乳液", "水性", "油类", "喷雾", "凝胶", "精华"],
+    special: "liquid",
+    category: ["液体", "液态", "乳液", "油类", "喷雾", "凝胶", "精华", "护理液", "清洁剂"],
     title: [
       "液体",
       "液态",

@@ -1,5 +1,29 @@
 var TZ = TZ || {};
 
+TZ.isKidsGoods = function (title, category) {
+  let hay = String(title || "") + " " + String(category || "");
+  if (!hay.trim()) return false;
+  hay = hay.replace(
+    /非儿童[^，。,;；]{0,8}|不适合儿童[^，。,;；]{0,6}|不供儿童[^，。,;；]{0,6}|儿童勿用|禁止儿童[^，。,;；]{0,6}|非幼儿[^，。,;；]{0,6}|keep away from children|not for children|adults? only/gi,
+    " "
+  );
+  const t = hay.toLowerCase();
+  return /儿童|婴童|童装|母婴|婴儿|幼儿|婴幼儿|童|\bkids\b|\bbaby\b|toddler|infant/.test(t);
+};
+
+TZ.isLiquidGoods = function (title, category) {
+  let hay = String(title || "") + " " + String(category || "");
+  if (!hay.trim()) return false;
+  hay = hay.replace(
+    /液晶|水性笔|油性笔|油烟机|油纸|油画|油桃|油封|水果|水杯|水壶|水槽|水龙头|水管|水池|水泥|水稻|水晶|水钻|水瓶|水袋|水枪|墨水屏|e-?ink|eink/gi,
+    " "
+  );
+  if (/液/.test(hay)) return true;
+  return /液体|液态|乳液|水剂|油剂|凝胶|凝露|喷雾|喷剂|精油|机油|润滑油|香油|橄榄油|菜籽油|食用油|卸妆油|护发油|防晒油|汽油|柴油|指甲油|胶水|涂料|酒精|消毒|洗衣液|洗手液|沐浴露|洗发水|护发素|化妆水|爽肤水|漱口水|眼药水|香水|香薰|墨水|颜料|bleach|liquid|\blotion\b|\bserum\b|\bspray\b|\bgel\b|essential oil|shampoo|conditioner|mouthwash|detergent|nail polish|\bglue\b|\bpaint\b|\bink\b|toner/i.test(
+    hay
+  );
+};
+
 TZ.includesAny = function (hay, needles) {
   if (!hay) return false;
   const t = String(hay).toLowerCase();
@@ -102,6 +126,77 @@ TZ.exclusionReasons = function (parsed, settings) {
         (TZ.hasBrandLabel && TZ.hasBrandLabel(parsed && parsed.card, parsed && parsed.zhiliaoEl))
       ) {
         reasons.push("标题下方有品牌标");
+      }
+      return;
+    }
+    if (rule.special === "clothing") {
+      const title = String((parsed && parsed.title) || "");
+      const cat = hasZ ? String(z.category || "") : "";
+      const skip = /衣架|衣柜|衣帽架|洗衣机|干衣机|服务器|口服液|皮肤/;
+      const garb =
+        /服装|衣服|服饰|女装|男装|内衣|内裤|文胸|胸罩|睡衣|睡裙|睡袍|家居服|袜子|丝袜|饰品|首饰|项链|耳环|戒指|手链|手镯|连衣裙|半身裙|裤子|短裤|衬衫|卫衣|外套|大衣|吊带|抹胸|圆领|露背|连体衣|连体裤|lingerie|pajama|pyjama|sleepwear|loungewear|nightwear|romper|bodysuit|camisole|underwear|apparel|jewelry|blouse|hoodie|sweater|\bbra\b|\bdress\b/;
+      if (hasZ && TZ.includesAny(z.category, rule.category)) {
+        reasons.push("品类命中「" + rule.label + "」");
+        return;
+      }
+      if (skip.test(title) && !garb.test(title)) return;
+      if (
+        garb.test(title) ||
+        garb.test(cat) ||
+        TZ.includesAny(title, rule.title) ||
+        (hasZ && TZ.includesAny(z.category, rule.title))
+      ) {
+        reasons.push("标题/品类命中「" + rule.label + "」");
+      }
+      return;
+    }
+    if (rule.special === "liquid") {
+      const title = String((parsed && parsed.title) || "");
+      const cat = hasZ ? String(z.category || "") : "";
+      if (TZ.isLiquidGoods(title, cat)) {
+        reasons.push("标题/品类命中「" + rule.label + "」");
+      }
+      return;
+    }
+    if (rule.special === "kids") {
+      const title = String((parsed && parsed.title) || "");
+      const cat = hasZ ? String(z.category || "") : "";
+      if (TZ.isKidsGoods(title, cat)) {
+        reasons.push("标题/品类命中「" + rule.label + "」");
+      }
+      return;
+    }
+    if (rule.special === "knife") {
+      const title = String((parsed && parsed.title) || "");
+      const cat = hasZ ? String(z.category || "") : "";
+      const skip = /螺丝刀|改锥|刀塔|刀削面|卷笔刀|铅笔刀|指甲刀|指甲剪/;
+      if (hasZ && TZ.includesAny(z.category, rule.category)) {
+        reasons.push("品类命中「" + rule.label + "」");
+        return;
+      }
+      if (
+        (/刀/.test(title) && !skip.test(title)) ||
+        (/刀/.test(cat) && !skip.test(cat)) ||
+        TZ.includesAny(title, rule.title) ||
+        TZ.includesAny(cat, rule.title)
+      ) {
+        reasons.push("标题/品类命中「" + rule.label + "」");
+      }
+      return;
+    }
+    if (rule.special === "pen") {
+      const title = String((parsed && parsed.title) || "");
+      const skip = /笔记本|记事本|手账本|笔袋|笔筒|笔盒|笔帘|笔洗|笔架|笔插|笔电|触控笔|电容笔|手写笔|pencil case|notebook|stylus/;
+      if (hasZ && TZ.includesAny(z.category, rule.category)) {
+        reasons.push("品类命中「" + rule.label + "」");
+        return;
+      }
+      if (
+        (/笔/.test(title) && !skip.test(title)) ||
+        TZ.includesAny(title, rule.title) ||
+        (hasZ && TZ.includesAny(z.category, rule.title))
+      ) {
+        reasons.push("标题/品类命中「" + rule.label + "」");
       }
       return;
     }

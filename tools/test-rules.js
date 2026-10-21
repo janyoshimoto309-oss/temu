@@ -97,6 +97,24 @@ if (!v.reasons.some((r) => String(r).indexOf("品类") >= 0)) {
   fail += 1;
 }
 
+v = T.evaluateRules(
+  card({ category: "女士内衣、睡衣和家居服" }, { title: "女士四季圆领迷你时尚简约性感" }),
+  settings({ exclusions: { clothing: true } })
+);
+eq("sleepwear category dims", v.dim, true);
+
+v = T.evaluateRules(
+  card({ category: "手机支架" }, { title: "女士四季圆领迷你时尚简约性感" }),
+  settings({ exclusions: { clothing: true } })
+);
+eq("round neck title dims", v.dim, true);
+
+v = T.evaluateRules(
+  card({ category: "家电" }, { title: "全自动洗衣机10kg" }),
+  settings({ exclusions: { clothing: true } })
+);
+eq("washer not clothing", v.dim, false);
+
 v = T.evaluateRules(card(), settings({ thresholds: { dailySalesMin: 200 } }));
 eq("empty pack2 does not rescue", v.dim, true);
 
@@ -178,6 +196,90 @@ eq("price above keeps", v.dim, false);
 
 v = T.evaluateRules(card({}, { price: 2 }), settings({ priceAtMost: 2 }));
 eq("price equal dims", v.dim, true);
+
+v = T.evaluateRules(
+  card({ category: "美术用品和手工艺品" }, { title: "6支油性蜡水彩丽笔 专业吸合" }),
+  settings({ exclusions: { pen: true } })
+);
+eq("pen art marker title dims", v.dim, true);
+
+v = T.evaluateRules(
+  card({ category: "手机支架" }, { title: "A5笔记本文具" }),
+  settings({ exclusions: { pen: true } })
+);
+eq("notebook not pen", v.dim, false);
+
+v = T.evaluateRules(
+  card({ category: "书写工具" }, { title: "Phone holder" }),
+  settings({ exclusions: { pen: true } })
+);
+eq("pen category 书写 dims", v.dim, true);
+
+v = T.evaluateRules(
+  card({ category: "个护清洁" }, { title: "浓缩洗衣液 1L" }),
+  settings({ exclusions: { liquid: true } })
+);
+eq("liquid detergent dims", v.dim, true);
+
+v = T.evaluateRules(
+  card({ category: "美容护理" }, { title: "vitamin serum 30ml" }),
+  settings({ exclusions: { liquid: true } })
+);
+eq("liquid serum dims", v.dim, true);
+
+v = T.evaluateRules(
+  card({ category: "手机配件" }, { title: "液晶屏幕保护膜" }),
+  settings({ exclusions: { liquid: true } })
+);
+eq("lcd not liquid", v.dim, false);
+
+v = T.evaluateRules(
+  card({ category: "美术用品和手工艺品" }, { title: "6支油性蜡水彩丽笔 专业吸合" }),
+  settings({ exclusions: { liquid: true } })
+);
+eq("oil pen not liquid", v.dim, false);
+
+v = T.evaluateRules(
+  card({ category: "刀具、零件和配件" }, { title: "升级款2件装猫爪造型伸缩美工刀组合" }),
+  settings({ exclusions: { knife: true } })
+);
+eq("box cutter dims", v.dim, true);
+
+v = T.evaluateRules(
+  card({ category: "手机支架" }, { title: "升级款2件装猫爪造型伸缩美工" }),
+  settings({ exclusions: { knife: true } })
+);
+eq("cutter title without 刀 keeps if no keyword", v.dim, false);
+
+v = T.evaluateRules(
+  card({ category: "工具" }, { title: "十字螺丝刀套装" }),
+  settings({ exclusions: { knife: true } })
+);
+eq("screwdriver not knife", v.dim, false);
+
+v = T.evaluateRules(
+  card({ category: "玩具手办玩偶套装" }, { title: "6件套随机宠物笼宠物玩偶 非儿童使用 圣诞节礼物" }),
+  settings({ exclusions: { toysKids: true } })
+);
+eq("not-for-children toy keeps", v.dim, false);
+
+v = T.evaluateRules(
+  card({ category: "玩具手办玩偶套装" }, { title: "木制积木 儿童适用 3岁+" }),
+  settings({ exclusions: { toysKids: true } })
+);
+eq("for children dims", v.dim, true);
+
+v = T.evaluateRules(
+  card({ category: "家居" }, { title: "童趣贴纸墙贴" }),
+  settings({ exclusions: { toysKids: true } })
+);
+eq("bare 童 still dims", v.dim, true);
+
+v = T.evaluateRules(
+  card({ category: "婴童用品" }, { title: "Phone holder" }),
+  settings({ exclusions: { toysKids: true } })
+);
+eq("baby category dims", v.dim, true);
 
 if (fail) {
   console.log("RULES_FAIL", fail);
