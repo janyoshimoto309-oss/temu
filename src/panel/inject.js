@@ -139,11 +139,15 @@ TZ.panel = {
   _presetBar: function (slot) {
     return `
             <div class="tz-preset" data-preset-slot="${slot}">
-              <select data-preset-list="${slot}"></select>
-              <button class="tz-btn ghost" type="button" data-act="presetApply" data-preset-slot="${slot}">填入</button>
-              <input type="text" data-preset-name="${slot}" placeholder="方案名称" maxlength="24">
-              <button class="tz-btn ghost" type="button" data-act="presetSave" data-preset-slot="${slot}">存当前</button>
-              <button class="tz-btn ghost" type="button" data-act="presetDel" data-preset-slot="${slot}">删除</button>
+              <div class="tz-preset-row">
+                <select data-preset-list="${slot}"></select>
+                <button class="tz-btn ghost" type="button" data-act="presetApply" data-preset-slot="${slot}">填入</button>
+              </div>
+              <div class="tz-preset-row">
+                <input type="text" data-preset-name="${slot}" placeholder="方案名称" maxlength="24">
+                <button class="tz-btn ghost" type="button" data-act="presetSave" data-preset-slot="${slot}">存当前</button>
+                <button class="tz-btn ghost" type="button" data-act="presetDel" data-preset-slot="${slot}">删除</button>
+              </div>
             </div>
             <div class="tz-muted" data-preset-msg="${slot}"></div>`;
   },
@@ -189,57 +193,75 @@ TZ.panel = {
         <div class="tz-body">
           <div class="tz-block" data-el="filterBlock">
             <div class="tz-block-title">
-              筛选 <span class="hint">两套数字为或 · 品类命中即灰</span>
-              <span class="tz-row">
+              <div class="tz-block-heading">
+                筛选
+                <span class="hint">两套数字为或 · 品类命中即灰</span>
+              </div>
+              <span class="tz-actions">
                 <button class="tz-btn ghost" type="button" data-act="toggleFilterFold" data-el="foldFilterBtn">收起</button>
                 <button class="tz-btn ghost" type="button" data-act="clearFilter">清空</button>
                 <button class="tz-btn primary" type="button" data-act="saveRules">保存规则</button>
               </span>
             </div>
             <div class="tz-block-body">
-            <div class="tz-muted" data-el="saveMeta" style="margin-bottom:8px">保存规则会连同自动点开的门槛、最多点开个数和间隔一起记住。</div>
-            <label class="tz-check" style="margin-bottom:8px">
+            <div class="tz-muted" data-el="saveMeta">保存规则会连同自动点开的门槛、最多点开个数和间隔一起记住。</div>
+            <label class="tz-check lead">
               <input type="checkbox" data-el="searchPageEnabled">
               <span>搜索页也筛选（默关）</span>
             </label>
-            <div class="tz-pack-title">第一套数字</div>
-            ${this._presetBar("thresholds")}
-            ${this._thresholdGrid("data-th", "data-th-unit")}
-            <div class="tz-pack-title">第二套数字（过此套也可留下）</div>
-            ${this._presetBar("thresholdsB")}
-            ${this._thresholdGrid("data-th-b", "data-th-b-unit")}
-            <div class="tz-muted" style="margin:6px 0 8px">两套之间是「或」：过其中一套数字门槛即可留下。每套内部仍是「并且」。某套全空则该套不启用。页面上销量为「-」或空的，跳过该条。品类命中仍变灰，数字救不回来。</div>
-            <div class="tz-block-title" style="margin-top:10px">不看 / 不做（规则）</div>
+            <div class="tz-pack">
+              <div class="tz-pack-title">第一套数字</div>
+              ${this._presetBar("thresholds")}
+              ${this._thresholdGrid("data-th", "data-th-unit")}
+            </div>
+            <div class="tz-pack">
+              <div class="tz-pack-title">第二套数字（过此套也可留下）</div>
+              ${this._presetBar("thresholdsB")}
+              ${this._thresholdGrid("data-th-b", "data-th-b-unit")}
+            </div>
+            <div class="tz-muted">两套之间是「或」：过其中一套数字门槛即可留下。每套内部仍是「并且」。某套全空则该套不启用。页面上销量为「-」或空的，跳过该条。品类命中仍变灰，数字救不回来。</div>
+            <div class="tz-block-title tz-subhead">
+              <div class="tz-block-heading">不看 / 不做（规则）</div>
+              <button class="tz-btn ghost" type="button" data-act="checkAllEx">全选</button>
+            </div>
             <div class="tz-checks">${ruleChecks}</div>
             </div>
           </div>
 
           <div class="tz-block">
-            <div class="tz-block-title">AI 分类 <span class="hint">功能 B · 单独可关</span></div>
-            <label class="tz-check"><input type="checkbox" data-el="aiEnabled"><span>启用 AI 分类（只补规则漏网）</span></label>
-            <div class="tz-field" style="margin:8px 0">
+            <div class="tz-block-title">
+              <div class="tz-block-heading">
+                AI 分类
+                <span class="hint">功能 B · 单独可关</span>
+              </div>
+            </div>
+            <label class="tz-check lead"><input type="checkbox" data-el="aiEnabled"><span>启用 AI 分类（只补规则漏网）</span></label>
+            <div class="tz-field stack">
               <label>Gemini API Key（只存扩展后台）</label>
               <div class="tz-row">
-                <input type="password" data-el="apiKey" placeholder="AIza…" autocomplete="off" style="flex:1">
+                <input type="password" data-el="apiKey" placeholder="AIza…" autocomplete="off">
                 <button class="tz-btn ghost" type="button" data-act="saveKey">保存</button>
               </div>
               <div class="tz-muted" data-el="keyMeta">未保存密钥</div>
             </div>
             <div class="tz-checks">${aiChecks}</div>
-            <div class="tz-muted" style="margin-top:6px" data-el="aiStatus"></div>
+            <div class="tz-muted" data-el="aiStatus"></div>
           </div>
 
           <div class="tz-block c-block" data-el="autoBlock">
             <div class="tz-block-title">
-              自动点开 <span class="hint">独立模块 C · 不参与变灰</span>
-              <span class="tz-row">
+              <div class="tz-block-heading">
+                自动点开
+                <span class="hint">独立模块 C · 不参与变灰</span>
+              </div>
+              <span class="tz-actions">
                 <button class="tz-btn ghost" type="button" data-act="toggleAutoFold" data-el="foldAutoBtn">收起</button>
                 <button class="tz-btn ghost" type="button" data-act="clearAuto">清空筛选项</button>
               </span>
             </div>
             <div class="tz-block-body">
-            <label class="tz-check"><input type="checkbox" data-el="autoEnabled"><span>启用自动点开（默认关）</span></label>
-            <div class="tz-muted" style="margin:8px 0 4px">下面几条只限制点谁，空=不限制，并且才点，不变灰。点上面「保存规则」会一起记住。</div>
+            <label class="tz-check lead"><input type="checkbox" data-el="autoEnabled"><span>启用自动点开（默认关）</span></label>
+            <div class="tz-muted">下面几条只限制点谁，空=不限制，并且才点，不变灰。点上面「保存规则」会一起记住。</div>
             ${this._presetBar("autoOpen")}
             <div class="tz-grid">
               <div class="tz-field"><label>只点日销 ≥</label><input type="number" min="0" data-el="autoDaily" placeholder="空=不限制"></div>
@@ -260,10 +282,13 @@ TZ.panel = {
               <div class="tz-field"><label>最多点开 N 个</label><input type="number" min="1" data-el="autoMax"></div>
               <div class="tz-field"><label>两次间隔（秒）</label><input type="number" min="0.8" step="0.1" data-el="autoInterval"></div>
             </div>
-            <div class="tz-block-title" style="margin-top:10px">不看 / 不做（只限制点开）</div>
-            <div class="tz-muted" style="margin:0 0 6px">勾选后命中则不点，规则与上面筛选相同，不变灰。「保存规则」会一起记住。</div>
+            <div class="tz-block-title tz-subhead">
+              <div class="tz-block-heading">不看 / 不做（只限制点开）</div>
+              <button class="tz-btn ghost" type="button" data-act="checkAllAoEx">全选</button>
+            </div>
+            <div class="tz-muted">勾选后命中则不点，规则与上面筛选相同，不变灰。「保存规则」会一起记住。</div>
             <div class="tz-checks">${aoChecks}</div>
-            <div class="tz-row" style="margin-top:8px">
+            <div class="tz-actions footer">
               <button class="tz-btn primary" type="button" data-act="aoStart">开始</button>
               <button class="tz-btn warn" type="button" data-act="aoPause">暂停</button>
               <button class="tz-btn ghost" type="button" data-act="aoStop">停止</button>
@@ -271,11 +296,6 @@ TZ.panel = {
             <div class="tz-msg" data-el="aoMsg">关着时筛选只变灰，绝不跳转。</div>
             </div>
           </div>
-
-          <details class="tz-more">
-            <summary>解析预览 / 为何被标灰</summary>
-            <div class="tz-preview" data-el="preview">等待扫描商品卡…</div>
-          </details>
         </div>
       </section>
     `;
@@ -320,6 +340,8 @@ TZ.panel = {
       } else if (act === "presetSave") this._presetSave(btn.getAttribute("data-preset-slot"));
       else if (act === "presetApply") this._presetApply(btn.getAttribute("data-preset-slot"));
       else if (act === "presetDel") this._presetDelete(btn.getAttribute("data-preset-slot"));
+      else if (act === "checkAllEx") this._checkAll("[data-ex]");
+      else if (act === "checkAllAoEx") this._checkAll("[data-ao-ex]");
       else if (act === "aoStart") TZ.autoOpen.start(this.settings);
       else if (act === "aoPause") TZ.autoOpen.pause();
       else if (act === "aoStop") TZ.autoOpen.stop();
@@ -415,6 +437,13 @@ TZ.panel = {
     this.settings.panelLeft = Math.round(left);
     this.settings.panelTop = Math.round(top);
     this._applyPos();
+  },
+
+  _checkAll: function (sel) {
+    this.root.querySelectorAll(sel).forEach((box) => {
+      box.checked = true;
+    });
+    this._readForm();
   },
 
   _clearFilterFields: function () {
@@ -665,41 +694,6 @@ TZ.panel = {
     const n = TZ.dimmer.dimmedCount || 0;
     this._el("dimCount").textContent = String(n);
     this.root.querySelector('[data-el="dockCount"]').textContent = String(n);
-    const preview = this._el("preview");
-    const lines = [];
-    (TZ.filter.lastPreview || []).forEach((p, i) => {
-      lines.push(
-        "#" +
-          (i + 1) +
-          " " +
-          (p.title || "(无标题)").slice(0, 36) +
-          "\n  知了:" +
-          (p.zhiliao ? "有" : "无") +
-          " 日" +
-          (p.daily == null ? "-" : p.daily) +
-          " 周" +
-          (p.weekly == null ? "-" : p.weekly) +
-          " 月" +
-          (p.monthly == null ? "-" : p.monthly) +
-          " 已售" +
-          (p.sold == null ? "-" : p.sold) +
-          "\n  品类:" +
-          (p.category || "-") +
-          " 上架:" +
-          (p.listedRaw || "-") +
-          (p.listedMonths != null ? "(" + Number(p.listedMonths).toFixed(1) + "个月)" : "") +
-          " 评分:" +
-          (p.rating == null ? "-" : p.rating) +
-          "/" +
-          (p.reviews == null ? "-" : p.reviews) +
-          "\n  " +
-          (p.dim ? "变灰：" + (p.reasons || []).join("；") : "保留")
-      );
-    });
-    (TZ.filter.lastReasons || []).slice(0, 5).forEach((r) => {
-      lines.push("灰 " + String(r.title).slice(0, 24) + " · " + r.reason);
-    });
-    preview.textContent = lines.join("\n") || "当前页还没扫到商品卡。请打开知了数据后滚动列表。";
     if (this.aiStatus) this.setAiStatus(this.aiStatus);
   },
 

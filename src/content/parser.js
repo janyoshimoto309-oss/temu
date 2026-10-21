@@ -410,8 +410,75 @@ TZ.parseCard = function (card, zhiliaoEl) {
     goodsId: goodsId,
     imageUrl: imageUrl,
     isAd: isAd,
+    hasCustomBadge: TZ.hasCustomBadge(card, zhiliaoEl),
+    hasBrandLabel: TZ.hasBrandLabel(card, zhiliaoEl),
     pcs: TZ.parsePcsCount(title)
   };
+};
+
+TZ.CUSTOM_BADGE_RE = /^(定制|訂製|订制)$/;
+TZ.BRAND_LABEL_RE = /^(品牌官方店|品牌旗舰店|品牌店|品牌)\s*[:：]/;
+TZ.BRAND_LABEL_EN_RE = /^brand(\s*official(\s*store)?)?\s*[:：]/i;
+
+TZ.hasCustomBadge = function (card, zhiliaoEl) {
+  if (!card || !card.querySelectorAll) return false;
+
+  let imgRect = null;
+  const imgs = card.querySelectorAll("img");
+  for (let i = 0; i < imgs.length; i++) {
+    const img = imgs[i];
+    if (zhiliaoEl && zhiliaoEl.contains(img)) continue;
+    const alt = (img.getAttribute("alt") || img.getAttribute("aria-label") || "").replace(/\s+/g, "");
+    if (TZ.CUSTOM_BADGE_RE.test(alt)) {
+      const ir = img.getBoundingClientRect ? img.getBoundingClientRect() : null;
+      if (!ir || ir.width < 80) return true;
+    }
+    if (!imgRect && img.getBoundingClientRect) {
+      const r = img.getBoundingClientRect();
+      if (r.width >= 40 && r.height >= 40) imgRect = r;
+    }
+  }
+
+  const els = card.querySelectorAll("span, div, em, i, p, label, b, strong, font, a");
+  for (let i = 0; i < els.length; i++) {
+    const el = els[i];
+    if (zhiliaoEl && zhiliaoEl.contains(el)) continue;
+    let own = "";
+    const kids = el.childNodes;
+    for (let j = 0; j < kids.length; j++) {
+      if (kids[j].nodeType === 3) own += kids[j].nodeValue || "";
+    }
+    const t = own.replace(/\s+/g, "").trim();
+    const aria = (el.getAttribute && (el.getAttribute("aria-label") || el.getAttribute("alt") || "")) || "";
+    const ariaT = String(aria).replace(/\s+/g, "").trim();
+    const hit = TZ.CUSTOM_BADGE_RE.test(t) || TZ.CUSTOM_BADGE_RE.test(ariaT);
+    if (!hit) continue;
+    if (!imgRect || !el.getBoundingClientRect) return true;
+    const br = el.getBoundingClientRect();
+    if (!br.width && !br.height) return true;
+    const cx = br.left + br.width / 2;
+    const cy = br.top + br.height / 2;
+    const inLeft = cx >= imgRect.left - 12 && cx <= imgRect.left + imgRect.width * 0.5;
+    const inTop = cy >= imgRect.top - 12 && cy <= imgRect.top + imgRect.height * 0.45;
+    if (inLeft && inTop) return true;
+  }
+  return false;
+};
+
+TZ.hasBrandLabel = function (card, zhiliaoEl) {
+  if (!card || !card.querySelectorAll) return false;
+  const els = card.querySelectorAll("span, div, em, i, p, label, b, strong, font, a");
+  for (let i = 0; i < els.length; i++) {
+    const el = els[i];
+    if (zhiliaoEl && zhiliaoEl.contains(el)) continue;
+    if (/^H[1-4]$/i.test(el.tagName)) continue;
+    const raw = (el.innerText || el.textContent || "").replace(/\s+/g, " ").trim();
+    if (!raw || raw.length > 48) continue;
+    if (raw.indexOf("知了") >= 0 || raw.indexOf("已售") >= 0 || raw.indexOf("销量") >= 0) continue;
+    const line = raw.split("\n")[0].trim();
+    if (TZ.BRAND_LABEL_RE.test(line) || TZ.BRAND_LABEL_EN_RE.test(line)) return true;
+  }
+  return false;
 };
 
 TZ.isAdCard = function (card, zhiliaoEl) {

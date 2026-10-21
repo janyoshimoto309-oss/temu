@@ -52,6 +52,10 @@ function card(zOver, extra) {
   return Object.assign({ title: "Phone holder", sold: 5000, pcs: null, zhiliao: z }, extra || {});
 }
 
+eq("brand re 品牌", T.BRAND_LABEL_RE.test("品牌: 环球"), true);
+eq("brand re 官方店", T.BRAND_LABEL_RE.test("品牌官方店: CLOHOO"), true);
+eq("brand re not title", T.BRAND_LABEL_RE.test("男士运动鞋品牌鞋"), false);
+
 eq("pack empty", T.packEnabled(T.DEFAULT_SETTINGS.thresholds), false);
 eq("pack daily", T.packEnabled({ dailySalesMin: 50 }), true);
 
@@ -114,6 +118,38 @@ eq("only pack2 pass", v.dim, false);
 
 v = T.evaluateRules(card(), settings({ thresholdsB: { dailySalesMin: 200 } }));
 eq("only pack2 fail", v.dim, true);
+
+v = T.evaluateRules(
+  card({ category: "女士钥匙扣、钥匙链" }, { title: "Custom wallet", hasCustomBadge: true }),
+  settings({ exclusions: { custom: true } })
+);
+eq("custom badge dims", v.dim, true);
+if (!v.reasons.some((r) => String(r).indexOf("定制") >= 0)) {
+  console.log("FAIL custom badge reason", v.reasons);
+  fail += 1;
+}
+
+v = T.evaluateRules(
+  card({ category: "女士钥匙扣、钥匙链" }, { title: "Custom wallet 定制钥匙扣", hasCustomBadge: false }),
+  settings({ exclusions: { custom: true } })
+);
+eq("custom title without badge does not dim", v.dim, false);
+
+v = T.evaluateRules(
+  card({ category: "运动鞋" }, { title: "男士运动鞋", hasBrandLabel: true }),
+  settings({ exclusions: { brandLabel: true } })
+);
+eq("brand label dims", v.dim, true);
+if (!v.reasons.some((r) => String(r).indexOf("品牌") >= 0)) {
+  console.log("FAIL brand label reason", v.reasons);
+  fail += 1;
+}
+
+v = T.evaluateRules(
+  card({ category: "运动鞋" }, { title: "男士运动鞋 品牌鞋", hasBrandLabel: false }),
+  settings({ exclusions: { brandLabel: true } })
+);
+eq("title 品牌 without chip does not dim", v.dim, false);
 
 if (fail) {
   console.log("RULES_FAIL", fail);

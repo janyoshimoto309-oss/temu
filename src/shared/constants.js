@@ -76,8 +76,12 @@ TZ.RULE_EXCLUSIONS = [
   {
     id: "custom",
     label: "定制",
-    category: ["定制", "订制", "个性化"],
-    title: ["定制", "订制", "私人订制", "custom", "personalized", "personalised", "engraved"]
+    special: "customBadge"
+  },
+  {
+    id: "brandLabel",
+    label: "品牌 / 官方店",
+    special: "brandLabel"
   },
   {
     id: "over20pcs",

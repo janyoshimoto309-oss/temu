@@ -77,6 +77,24 @@ TZ.exclusionReasons = function (parsed, settings) {
       }
       return;
     }
+    if (rule.special === "customBadge") {
+      if (
+        (parsed && parsed.hasCustomBadge) ||
+        (TZ.hasCustomBadge && TZ.hasCustomBadge(parsed && parsed.card, parsed && parsed.zhiliaoEl))
+      ) {
+        reasons.push("主图左上角有「定制」");
+      }
+      return;
+    }
+    if (rule.special === "brandLabel") {
+      if (
+        (parsed && parsed.hasBrandLabel) ||
+        (TZ.hasBrandLabel && TZ.hasBrandLabel(parsed && parsed.card, parsed && parsed.zhiliaoEl))
+      ) {
+        reasons.push("标题下方有品牌标");
+      }
+      return;
+    }
     if (hasZ && TZ.includesAny(z.category, rule.category)) {
       reasons.push("品类命中「" + rule.label + "」");
       return;

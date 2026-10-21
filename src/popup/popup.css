@@ -1,9 +1,18 @@
+:root {
+  --tz-bg: #12101a;
+  --tz-bg-2: #171325;
+  --tz-accent: #6d28d9;
+  --tz-muted: #b4aec8;
+  --tz-text: #eeeaf8;
+  --tz-focus: 0 0 0 2px #12101a, 0 0 0 4px #a78bfa;
+}
+
 body {
   margin: 0;
   min-width: 240px;
-  font: 13px/1.4 "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-  color: #e8e6ef;
-  background: #171325;
+  font: 13px/1.45 "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: var(--tz-text);
+  background: linear-gradient(180deg, var(--tz-bg-2) 0%, var(--tz-bg) 100%);
 }
 
 .wrap {
@@ -19,8 +28,11 @@ body {
 
 .hint {
   margin: 8px 0 0;
-  color: #a8a3b8;
+  color: var(--tz-muted);
   font-size: 11px;
+  line-height: 1.5;
+  padding-left: 8px;
+  border-left: 2px solid rgba(167, 139, 250, 0.45);
 }
 
 .power input {
@@ -55,10 +67,21 @@ body {
 }
 
 .power input:checked + .track {
-  background: #6d28d9;
+  background: var(--tz-accent);
 }
 
 .power input:checked + .track .knob {
   transform: translateX(16px);
   background: #fff;
+}
+
+.power input:focus-visible + .track {
+  outline: none;
+  box-shadow: var(--tz-focus);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .knob {
+    transition: none;
+  }
 }
