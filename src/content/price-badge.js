@@ -55,30 +55,7 @@ TZ.priceBadge = {
   },
 
   _salePriceFromText: function (text) {
-    if (!text) return null;
-    let t = String(text).replace(/\u00a0/g, " ");
-    t = t.replace(/今天支付\s*\$?\s*\d+\.\d{2}/g, "");
-    t = t.replace(/今日支付\s*\$?\s*\d+\.\d{2}/g, "");
-    t = t.replace(/抵用金[\s\S]{0,16}\$\d+\.\d{2}/g, "");
-    t = t.replace(/\$\d+\.\d{2}\s*抵用金/g, "");
-    t = t.replace(/赔付\$\d+\.\d{2}/g, "");
-    t = t.replace(/超时赔付[^\d$]{0,12}\$\d+\.\d{2}/g, "");
-    const prices = [];
-    const re = /\$(\d+)\.(\d{2})/g;
-    let m;
-    while ((m = re.exec(t))) {
-      const n = parseFloat(m[1] + "." + m[2]);
-      if (Number.isFinite(n) && n > 0 && n <= 2000) prices.push(n);
-    }
-    if (!prices.length) return null;
-    prices.sort(function (a, b) {
-      return a - b;
-    });
-    const uniq = [];
-    for (let i = 0; i < prices.length; i++) {
-      if (!uniq.length || Math.abs(uniq[uniq.length - 1] - prices[i]) > 0.001) uniq.push(prices[i]);
-    }
-    return uniq[0];
+    return TZ.parseSalePrice(text);
   },
 
   _findAnchor: function (root, n) {
@@ -141,16 +118,19 @@ TZ.priceBadge = {
 
   _markCard: function (parsed) {
     const card = parsed.card;
+    if (TZ.pageScope && TZ.pageScope.isUiChrome && TZ.pageScope.isUiChrome(card)) return;
     const found = this._findCurrentPrice(card);
     if (!found) return;
     const half = TZ.formatHalfPrice(found.n);
     if (!half) return;
     const badge = this._ensure(card, TZ.HALF_CLASS + "--list");
-    if (badge.getAttribute("data-tz-half-of") === String(found.n) && badge.textContent === half) {
-      const zh =
-        (parsed.zhiliaoEl && card.contains(parsed.zhiliaoEl) && parsed.zhiliaoEl) || this._findZhiliaoHost(card);
-      if (zh && badge.previousSibling === zh) return;
-      if (!zh && badge.previousSibling === found.el) return;
+    if (
+      badge.parentNode &&
+      card.contains(badge) &&
+      badge.getAttribute("data-tz-half-of") === String(found.n)
+    ) {
+      if (badge.textContent !== half) badge.textContent = half;
+      return;
     }
     badge.setAttribute("data-tz-half-of", String(found.n));
     if (badge.textContent !== half) badge.textContent = half;
@@ -166,6 +146,7 @@ TZ.priceBadge = {
     for (let i = 0; i < nodes.length; i++) {
       const el = nodes[i];
       if (this._isOurs(el)) continue;
+      if (TZ.pageScope && TZ.pageScope.isUiChrome && TZ.pageScope.isUiChrome(el)) continue;
       const t = (el.innerText || "").replace(/\s+/g, "");
       if (!t || t.length > 24) continue;
       if (t.indexOf("加入购物车") === 0 || t.indexOf("立即加购") === 0 || t.indexOf("Addtocart") === 0) {
@@ -176,6 +157,10 @@ TZ.priceBadge = {
     if (!cart) return document.body;
     let p = cart.parentElement;
     for (let i = 0; i < 14 && p && p !== document.body; i++) {
+      if (TZ.pageScope && TZ.pageScope.isUiChrome && TZ.pageScope.isUiChrome(p)) {
+        p = p.parentElement;
+        continue;
+      }
       const w = p.offsetWidth || 0;
       if (w >= 260 && w <= 720) return p;
       p = p.parentElement;
@@ -196,10 +181,11 @@ TZ.priceBadge = {
       badge.className = TZ.HALF_CLASS + " " + TZ.HALF_CLASS + "--detail";
       badge.setAttribute(TZ.HALF_ATTR, "1");
     }
-    if (badge.getAttribute("data-tz-half-of") === String(found.n) && badge.parentNode && badge.previousSibling === found.el) {
+    if (badge.parentNode && badge.getAttribute("data-tz-half-of") === String(found.n)) {
       if (badge.textContent !== half) badge.textContent = half;
       return;
     }
+    if (TZ.pageScope && TZ.pageScope.isUiChrome && TZ.pageScope.isUiChrome(found.el)) return;
     badge.setAttribute("data-tz-half-of", String(found.n));
     if (badge.textContent !== half) badge.textContent = half;
     this._placeAfter(found.el, badge);

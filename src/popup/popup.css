@@ -5,6 +5,29 @@
   --tz-muted: #b4aec8;
   --tz-text: #eeeaf8;
   --tz-focus: 0 0 0 2px #12101a, 0 0 0 4px #a78bfa;
+  --tz-power-off: #3f3a52;
+  --tz-power-knob: #ddd6fe;
+  --tz-hint-bar: rgba(167, 139, 250, 0.45);
+  --tz-icon-bg: rgba(255, 255, 255, 0.08);
+  --tz-icon-hover: rgba(255, 255, 255, 0.14);
+  --tz-skin-preview: linear-gradient(135deg, #f0f9ff 48%, #0ea5e9 48%);
+  --tz-skin-preview-border: rgba(14, 165, 233, 0.55);
+}
+
+:root[data-skin="ice"] {
+  --tz-bg: #e8f4fb;
+  --tz-bg-2: #f7fbfe;
+  --tz-accent: #0284c7;
+  --tz-muted: #5b8499;
+  --tz-text: #0c4a6e;
+  --tz-focus: 0 0 0 2px #f7fbfe, 0 0 0 4px #38bdf8;
+  --tz-power-off: #c5d9e6;
+  --tz-power-knob: #ffffff;
+  --tz-hint-bar: rgba(14, 165, 233, 0.55);
+  --tz-icon-bg: rgba(14, 165, 233, 0.1);
+  --tz-icon-hover: rgba(14, 165, 233, 0.18);
+  --tz-skin-preview: linear-gradient(135deg, #171325 48%, #7c3aed 48%);
+  --tz-skin-preview-border: rgba(124, 58, 237, 0.5);
 }
 
 body {
@@ -32,7 +55,13 @@ body {
   font-size: 11px;
   line-height: 1.5;
   padding-left: 8px;
-  border-left: 2px solid rgba(167, 139, 250, 0.45);
+  border-left: 2px solid var(--tz-hint-bar);
+}
+
+.head-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .power input {
@@ -50,7 +79,7 @@ body {
   width: 36px;
   height: 20px;
   border-radius: 999px;
-  background: #3f3a52;
+  background: var(--tz-power-off);
   position: relative;
   display: block;
 }
@@ -62,7 +91,7 @@ body {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #ddd6fe;
+  background: var(--tz-power-knob);
   transition: transform 0.15s ease;
 }
 
@@ -75,9 +104,38 @@ body {
   background: #fff;
 }
 
-.power input:focus-visible + .track {
+.power input:focus-visible + .track,
+.skin-btn:focus-visible {
   outline: none;
   box-shadow: var(--tz-focus);
+}
+
+.skin-btn {
+  appearance: none;
+  border: 1px solid var(--tz-skin-preview-border);
+  background: var(--tz-icon-bg);
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.skin-btn:hover {
+  background: var(--tz-icon-hover);
+}
+
+.skin-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  background: var(--tz-skin-preview);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -282,6 +282,29 @@ TZ.parseZhiliaoText = function (text) {
   return result;
 };
 
+TZ.parseSalePrice = function (text) {
+  if (!text) return null;
+  let t = String(text).replace(/\u00a0/g, " ");
+  t = t.replace(/今天支付\s*\$?\s*\d+\.\d{2}/g, "");
+  t = t.replace(/今日支付\s*\$?\s*\d+\.\d{2}/g, "");
+  t = t.replace(/抵用金[\s\S]{0,16}\$\d+\.\d{2}/g, "");
+  t = t.replace(/\$\d+\.\d{2}\s*抵用金/g, "");
+  t = t.replace(/赔付\$\d+\.\d{2}/g, "");
+  t = t.replace(/超时赔付[^\d$]{0,12}\$\d+\.\d{2}/g, "");
+  const prices = [];
+  const re = /\$(\d+)\.(\d{2})/g;
+  let m;
+  while ((m = re.exec(t))) {
+    const n = parseFloat(m[1] + "." + m[2]);
+    if (Number.isFinite(n) && n > 0 && n <= 2000) prices.push(n);
+  }
+  if (!prices.length) return null;
+  prices.sort(function (a, b) {
+    return a - b;
+  });
+  return prices[0];
+};
+
 TZ.parsePriceNumber = function (raw) {
   if (raw == null || raw === "") return null;
   let s = TZ.normalizeDigits(String(raw)).replace(/,/g, "").replace(/\u00a0/g, " ").trim();
@@ -357,6 +380,8 @@ TZ.parseCard = function (card, zhiliaoEl) {
     }
   }
   const sold = TZ.parseTemuSold(cardText);
+  const temuText = zhiliaoEl ? TZ.innerTextSkip(card, zhiliaoEl) : cardText;
+  const price = TZ.parseSalePrice(temuText);
 
   let href = "";
   let goodsId = "";
@@ -411,6 +436,7 @@ TZ.parseCard = function (card, zhiliaoEl) {
     zhiliao: zhiliao,
     title: title,
     sold: sold,
+    price: price,
     href: href,
     goodsId: goodsId,
     imageUrl: imageUrl,

@@ -33,6 +33,7 @@ function settings(over) {
   if (over && over.thresholdsB) Object.assign(s.thresholdsB, over.thresholdsB);
   if (over && over.exclusions) s.exclusions = over.exclusions;
   if (over && over.pcsOver != null) s.pcsOver = over.pcsOver;
+  if (over && over.priceAtMost != null) s.priceAtMost = over.priceAtMost;
   return s;
 }
 
@@ -165,6 +166,18 @@ eq("pcs under does not dim", v.dim, false);
 
 v = T.evaluateRules(card({}, { title: "24pcs set", pcs: 24 }), settings({}));
 eq("pcs empty off", v.dim, false);
+
+eq("sale min of two", T.parseSalePrice("$19.65 $28.32 已售"), 19.65);
+eq("sale skip 今天支付", T.parseSalePrice("$2.92 $1.84 今天支付$0.46"), 1.84);
+
+v = T.evaluateRules(card({}, { price: 1.5 }), settings({ priceAtMost: 2 }));
+eq("price at most dims", v.dim, true);
+
+v = T.evaluateRules(card({}, { price: 2.01 }), settings({ priceAtMost: 2 }));
+eq("price above keeps", v.dim, false);
+
+v = T.evaluateRules(card({}, { price: 2 }), settings({ priceAtMost: 2 }));
+eq("price equal dims", v.dim, true);
 
 if (fail) {
   console.log("RULES_FAIL", fail);

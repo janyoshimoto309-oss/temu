@@ -20,6 +20,7 @@
   --tz-muted: #b4aec8;
   --tz-accent: #7c3aed;
   --tz-accent-2: #c4b5fd;
+  --tz-accent-hover: #8b5cf6;
   --tz-warn: #b45309;
   --tz-warn-bg: rgba(120, 53, 15, 0.22);
   --tz-warn-border: rgba(251, 191, 36, 0.32);
@@ -27,6 +28,41 @@
   --tz-radius-sm: 8px;
   --tz-gap: 8px;
   --tz-focus: 0 0 0 2px #12101a, 0 0 0 4px #a78bfa;
+  --tz-input-bg: #0d0b14;
+  --tz-input-text: #f5f3ff;
+  --tz-label: #d4cfe3;
+  --tz-check: #e4dff2;
+  --tz-check-on: rgba(124, 58, 237, 0.18);
+  --tz-hover: rgba(255, 255, 255, 0.05);
+  --tz-icon-bg: rgba(255, 255, 255, 0.08);
+  --tz-icon-hover: rgba(255, 255, 255, 0.14);
+  --tz-icon-color: #ddd6fe;
+  --tz-power-off: #3f3a52;
+  --tz-power-on: #6d28d9;
+  --tz-power-knob: #ddd6fe;
+  --tz-status-bg: rgba(76, 29, 149, 0.32);
+  --tz-status-border: rgba(167, 139, 250, 0.16);
+  --tz-pill-bg: #2e1065;
+  --tz-dock-bg: rgba(18, 14, 28, 0.94);
+  --tz-dock-text: #f5f3ff;
+  --tz-dock-count-bg: #4c1d95;
+  --tz-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  --tz-dock-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --tz-head-border: rgba(255, 255, 255, 0.06);
+  --tz-block-border: rgba(255, 255, 255, 0.08);
+  --tz-pack-border: rgba(196, 181, 253, 0.12);
+  --tz-ghost-bg: rgba(255, 255, 255, 0.1);
+  --tz-ghost-text: #efeafc;
+  --tz-ghost-hover: rgba(255, 255, 255, 0.16);
+  --tz-muted-bar: rgba(167, 139, 250, 0.45);
+  --tz-warn-bar: rgba(251, 191, 36, 0.55);
+  --tz-msg: #fbbf24;
+  --tz-check-accent: #8b5cf6;
+  --tz-primary-text: #ffffff;
+  --tz-input-hover: rgba(196, 181, 253, 0.4);
+  --tz-skin-preview: linear-gradient(135deg, #f0f9ff 48%, #0ea5e9 48%);
+  --tz-skin-preview-border: rgba(14, 165, 233, 0.55);
+  --tz-dot-glow: #a78bfa;
   position: fixed;
   right: 16px;
   bottom: 16px;
@@ -37,17 +73,70 @@
   line-height: 1.45;
 }
 
+.tz-root[data-skin="ice"] {
+  --tz-bg: #e8f4fb;
+  --tz-bg-2: #f7fbfe;
+  --tz-surface: rgba(255, 255, 255, 0.78);
+  --tz-surface-2: #ffffff;
+  --tz-border: rgba(14, 165, 233, 0.34);
+  --tz-border-weak: rgba(12, 74, 110, 0.16);
+  --tz-text: #0c4a6e;
+  --tz-muted: #5b8499;
+  --tz-accent: #0284c7;
+  --tz-accent-2: #0ea5e9;
+  --tz-accent-hover: #0369a1;
+  --tz-warn: #d97706;
+  --tz-warn-bg: rgba(251, 191, 36, 0.18);
+  --tz-warn-border: rgba(217, 119, 6, 0.38);
+  --tz-focus: 0 0 0 2px #f7fbfe, 0 0 0 4px #38bdf8;
+  --tz-input-bg: #ffffff;
+  --tz-input-text: #0c4a6e;
+  --tz-label: #164e63;
+  --tz-check: #164e63;
+  --tz-check-on: rgba(14, 165, 233, 0.16);
+  --tz-hover: rgba(14, 165, 233, 0.08);
+  --tz-icon-bg: rgba(14, 165, 233, 0.1);
+  --tz-icon-hover: rgba(14, 165, 233, 0.18);
+  --tz-icon-color: #0369a1;
+  --tz-power-off: #c5d9e6;
+  --tz-power-on: #0284c7;
+  --tz-power-knob: #ffffff;
+  --tz-status-bg: rgba(14, 165, 233, 0.12);
+  --tz-status-border: rgba(14, 165, 233, 0.2);
+  --tz-pill-bg: #e0f2fe;
+  --tz-dock-bg: rgba(247, 251, 254, 0.96);
+  --tz-dock-text: #0c4a6e;
+  --tz-dock-count-bg: #0284c7;
+  --tz-shadow: 0 18px 44px rgba(12, 74, 110, 0.16);
+  --tz-dock-shadow: 0 10px 24px rgba(12, 74, 110, 0.14);
+  --tz-head-border: rgba(12, 74, 110, 0.08);
+  --tz-block-border: rgba(14, 165, 233, 0.16);
+  --tz-pack-border: rgba(14, 165, 233, 0.18);
+  --tz-ghost-bg: rgba(14, 165, 233, 0.1);
+  --tz-ghost-text: #0c4a6e;
+  --tz-ghost-hover: rgba(14, 165, 233, 0.18);
+  --tz-muted-bar: rgba(14, 165, 233, 0.55);
+  --tz-warn-bar: rgba(217, 119, 6, 0.55);
+  --tz-msg: #b45309;
+  --tz-check-accent: #0ea5e9;
+  --tz-primary-text: #ffffff;
+  --tz-input-hover: rgba(14, 165, 233, 0.45);
+  --tz-skin-preview: linear-gradient(135deg, #171325 48%, #7c3aed 48%);
+  --tz-skin-preview-border: rgba(124, 58, 237, 0.5);
+  --tz-dot-glow: #38bdf8;
+}
+
 .tz-dock {
   display: none;
   align-items: center;
   gap: 10px;
   padding: 8px 12px 8px 10px;
   border-radius: 999px;
-  background: rgba(18, 14, 28, 0.94);
+  background: var(--tz-dock-bg);
   border: 1px solid var(--tz-border);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--tz-dock-shadow);
   cursor: grab;
-  color: #f5f3ff;
+  color: var(--tz-dock-text);
   user-select: none;
 }
 
@@ -64,12 +153,12 @@
   height: 8px;
   border-radius: 50%;
   background: var(--tz-accent-2);
-  box-shadow: 0 0 8px #a78bfa;
+  box-shadow: 0 0 8px var(--tz-dot-glow);
 }
 
 .tz-dock-count {
-  background: #4c1d95;
-  color: #f5f3ff;
+  background: var(--tz-dock-count-bg);
+  color: var(--tz-primary-text);
   border-radius: 999px;
   padding: 1px 8px;
   font-size: 12px;
@@ -85,7 +174,7 @@
   background: linear-gradient(180deg, var(--tz-bg-2) 0%, var(--tz-bg) 100%);
   border: 1px solid var(--tz-border);
   border-radius: 16px;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--tz-shadow);
 }
 
 .tz-chrome {
@@ -102,7 +191,7 @@
   gap: var(--tz-gap);
   padding: 12px 14px 10px;
   background: var(--tz-bg-2);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--tz-head-border);
   cursor: grab;
 }
 
@@ -139,7 +228,7 @@
   width: 36px;
   height: 20px;
   border-radius: 999px;
-  background: #3f3a52;
+  background: var(--tz-power-off);
   position: relative;
   display: block;
 }
@@ -151,12 +240,12 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #ddd6fe;
+  background: var(--tz-power-knob);
   transition: transform 0.15s ease;
 }
 
 .tz-power input:checked + .tz-power-track {
-  background: #6d28d9;
+  background: var(--tz-power-on);
 }
 
 .tz-power input:checked + .tz-power-track .tz-power-knob {
@@ -167,8 +256,8 @@
 .tz-icon-btn {
   appearance: none;
   border: 0;
-  background: rgba(255, 255, 255, 0.08);
-  color: #ddd6fe;
+  background: var(--tz-icon-bg);
+  color: var(--tz-icon-color);
   width: 28px;
   height: 28px;
   min-width: 28px;
@@ -180,10 +269,39 @@
 }
 
 .tz-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.14);
+  background: var(--tz-icon-hover);
+}
+
+.tz-skin-btn {
+  appearance: none;
+  border: 1px solid var(--tz-skin-preview-border);
+  background: var(--tz-icon-bg);
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: var(--tz-radius-sm);
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tz-skin-btn:hover {
+  background: var(--tz-icon-hover);
+}
+
+.tz-skin-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  background: var(--tz-skin-preview);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
 }
 
 .tz-icon-btn:focus-visible,
+.tz-skin-btn:focus-visible,
 .tz-power input:focus-visible + .tz-power-track,
 .tz-btn:focus-visible,
 .tz-field input:focus-visible,
@@ -201,12 +319,12 @@
   justify-content: space-between;
   gap: var(--tz-gap);
   padding: 8px 14px;
-  background: rgba(76, 29, 149, 0.32);
-  border-bottom: 1px solid rgba(167, 139, 250, 0.16);
+  background: var(--tz-status-bg);
+  border-bottom: 1px solid var(--tz-status-border);
 }
 
 .tz-pill {
-  background: #2e1065;
+  background: var(--tz-pill-bg);
   border-radius: 999px;
   padding: 2px 9px;
   font-variant-numeric: tabular-nums;
@@ -221,7 +339,7 @@
 }
 
 .tz-block {
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--tz-block-border);
   border-radius: var(--tz-radius);
   padding: 10px;
   background: var(--tz-surface);
@@ -285,7 +403,7 @@
   padding: 8px;
   border-radius: var(--tz-radius-sm);
   background: var(--tz-surface-2);
-  border: 1px solid rgba(196, 181, 253, 0.12);
+  border: 1px solid var(--tz-pack-border);
   min-width: 0;
   max-width: 100%;
   overflow: hidden;
@@ -356,7 +474,7 @@
 }
 
 .tz-field label {
-  color: #d4cfe3;
+  color: var(--tz-label);
   font-size: 11px;
 }
 
@@ -365,8 +483,8 @@
 .tz-preset select,
 .tz-preset input[type="text"] {
   appearance: none;
-  background: #0d0b14;
-  color: #f5f3ff;
+  background: var(--tz-input-bg);
+  color: var(--tz-input-text);
   border: 1px solid var(--tz-border-weak);
   border-radius: var(--tz-radius-sm);
   padding: 6px 8px;
@@ -381,7 +499,7 @@
 .tz-field select:hover,
 .tz-preset select:hover,
 .tz-preset input[type="text"]:hover {
-  border-color: rgba(196, 181, 253, 0.4);
+  border-color: var(--tz-input-hover);
 }
 
 .tz-row {
@@ -430,7 +548,7 @@
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #e4dff2;
+  color: var(--tz-check);
   min-height: 28px;
   padding: 2px 6px;
   border-radius: 6px;
@@ -441,15 +559,15 @@
 }
 
 .tz-check:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--tz-hover);
 }
 
 .tz-check:has(input:checked) {
-  background: rgba(124, 58, 237, 0.18);
+  background: var(--tz-check-on);
 }
 
 .tz-check input {
-  accent-color: #8b5cf6;
+  accent-color: var(--tz-check-accent);
   width: 14px;
   height: 14px;
   flex-shrink: 0;
@@ -469,29 +587,33 @@
 
 .tz-btn.primary {
   background: var(--tz-accent);
-  color: white;
+  color: var(--tz-primary-text);
 }
 
 .tz-btn.primary:hover {
-  background: #8b5cf6;
+  background: var(--tz-accent-hover);
 }
 
 .tz-btn.ghost {
-  background: rgba(255, 255, 255, 0.1);
-  color: #efeafc;
+  background: var(--tz-ghost-bg);
+  color: var(--tz-ghost-text);
 }
 
 .tz-btn.ghost:hover {
-  background: rgba(255, 255, 255, 0.16);
+  background: var(--tz-ghost-hover);
 }
 
 .tz-btn.warn {
   background: var(--tz-warn);
-  color: white;
+  color: var(--tz-primary-text);
 }
 
 .tz-btn.warn:hover {
   background: #c2410c;
+}
+
+.tz-root[data-skin="ice"] .tz-btn.warn:hover {
+  background: #b45309;
 }
 
 .tz-btn:active {
@@ -506,7 +628,7 @@
 
 .tz-msg {
   font-size: 11px;
-  color: #fbbf24;
+  color: var(--tz-msg);
   min-height: 16px;
   margin-top: 6px;
 }
@@ -516,12 +638,12 @@
   font-size: 11px;
   line-height: 1.5;
   padding-left: 8px;
-  border-left: 2px solid rgba(167, 139, 250, 0.45);
+  border-left: 2px solid var(--tz-muted-bar);
   margin: 0 0 var(--tz-gap);
 }
 
 .tz-block.c-block .tz-muted {
-  border-left-color: rgba(251, 191, 36, 0.55);
+  border-left-color: var(--tz-warn-bar);
 }
 
 @media (prefers-reduced-motion: reduce) {

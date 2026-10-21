@@ -120,6 +120,7 @@ TZ.detailRecs = {
     if (!card) return true;
     const r = card.getBoundingClientRect();
     if (r.height > Math.max(720, window.innerHeight * 0.75)) return true;
+    if (TZ.pageScope && TZ.pageScope.isUiChrome && TZ.pageScope.isUiChrome(card)) return true;
     if (pageId && card.getAttribute && card.getAttribute(TZ.ID_ATTR) === pageId) return true;
     const t = TZ.cards._lightText ? TZ.cards._lightText(card) : String(card.textContent || "");
     if (t.length > 8000) return true;

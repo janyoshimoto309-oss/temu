@@ -55,5 +55,37 @@ TZ.pageScope = {
     if (kind === "detail") return false;
     if (kind === "search") return !!(settings && settings.searchPageEnabled);
     return true;
+  },
+
+  isUiChrome: function (el) {
+    if (!el || el === document.body || el === document.documentElement) return true;
+    let n = el;
+    let hops = 0;
+    while (n && n !== document.body && hops < 16) {
+      let pos = "";
+      try {
+        pos = window.getComputedStyle(n).position;
+      } catch (e) {
+        pos = "";
+      }
+      if (pos === "fixed" || pos === "sticky") {
+        const r = n.getBoundingClientRect();
+        if (r.height > 0 && r.height < 220 && (r.top < 96 || r.bottom > window.innerHeight - 96)) {
+          return true;
+        }
+      }
+      n = n.parentElement;
+      hops += 1;
+    }
+    if (!el.getBoundingClientRect) return false;
+    const box = el.getBoundingClientRect();
+    if (box.top < 10 && box.width > window.innerWidth * 0.72 && box.height > 28 && box.height < 180) {
+      return true;
+    }
+    const t = String(el.textContent || "");
+    if (t.length < 4000 && t.indexOf("畅销商品") >= 0 && (t.indexOf("本地仓库") >= 0 || t.indexOf("订单和账户") >= 0)) {
+      return true;
+    }
+    return false;
   }
 };

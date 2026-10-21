@@ -28,6 +28,7 @@ TZ.panel = {
     this._applyPos();
     this._applyPluginOn();
     this._applyFolds();
+    this._applySkin();
   },
 
   _applyFolds: function () {
@@ -40,6 +41,14 @@ TZ.panel = {
     if (foldFilter) foldFilter.textContent = this.settings.filterFolded ? "展开" : "收起";
     const foldAuto = this._el("foldAutoBtn");
     if (foldAuto) foldAuto.textContent = this.settings.autoFolded ? "展开" : "收起";
+  },
+
+  _applySkin: function () {
+    if (!this.root) return;
+    const ice = this.settings && this.settings.panelSkin === "ice";
+    this.root.setAttribute("data-skin", ice ? "ice" : "violet");
+    const btn = this._el("skinBtn");
+    if (btn) btn.title = ice ? "换壳：黑紫" : "换壳：白蓝";
   },
 
   _applyPluginOn: function () {
@@ -147,13 +156,13 @@ TZ.panel = {
   },
 
   _html: function () {
-    const ruleChecks = TZ.RULE_EXCLUSIONS.filter((r) => r.special !== "pcs")
+    const ruleChecks = TZ.RULE_EXCLUSIONS.filter((r) => r.special !== "pcs" && r.special !== "priceAtMost")
       .map(
         (r) =>
           `<label class="tz-check"><input type="checkbox" data-ex="${r.id}"><span>${r.label}</span></label>`
       )
       .join("");
-    const aoChecks = TZ.RULE_EXCLUSIONS.filter((r) => r.special !== "pcs")
+    const aoChecks = TZ.RULE_EXCLUSIONS.filter((r) => r.special !== "pcs" && r.special !== "priceAtMost")
       .map(
         (r) =>
           `<label class="tz-check"><input type="checkbox" data-ao-ex="${r.id}"><span>${r.label}</span></label>`
@@ -178,6 +187,9 @@ TZ.panel = {
             <div class="tz-sub" data-el="verLine"></div>
           </div>
           <div class="tz-head-actions">
+            <button class="tz-skin-btn" type="button" data-act="toggleSkin" data-el="skinBtn" title="换壳：白蓝">
+              <span class="tz-skin-swatch" aria-hidden="true"></span>
+            </button>
             <label class="tz-power" title="插件总开关">
               <input type="checkbox" data-el="pluginPower" checked>
               <span class="tz-power-track"><span class="tz-power-knob"></span></span>
@@ -229,6 +241,10 @@ TZ.panel = {
             <div class="tz-field">
               <label>套装件数 &gt;（个 / 件 / pcs）</label>
               <input type="number" min="0" data-el="pcsOver" placeholder="空=不启用">
+            </div>
+            <div class="tz-field">
+              <label>现价 ≤（$）</label>
+              <input type="number" min="0" step="0.01" data-el="priceAtMost" placeholder="空=不启用">
             </div>
             <div class="tz-checks">${ruleChecks}</div>
             </div>
@@ -290,6 +306,10 @@ TZ.panel = {
               <label>套装件数 &gt;（个 / 件 / pcs）</label>
               <input type="number" min="0" data-el="autoPcsOver" placeholder="空=不限制">
             </div>
+            <div class="tz-field">
+              <label>现价 ≤（$）</label>
+              <input type="number" min="0" step="0.01" data-el="autoPriceAtMost" placeholder="空=不限制">
+            </div>
             <div class="tz-checks">${aoChecks}</div>
             <div class="tz-actions footer">
               <button class="tz-btn primary" type="button" data-act="aoStart">开始</button>
@@ -346,6 +366,11 @@ TZ.panel = {
       else if (act === "checkAllAoEx") this._checkAll("[data-ao-ex]");
       else if (act === "aoStart") TZ.autoOpen.start(this.settings);
       else if (act === "aoStop") TZ.autoOpen.stop();
+      else if (act === "toggleSkin") {
+        this.settings.panelSkin = this.settings.panelSkin === "ice" ? "violet" : "ice";
+        this._applySkin();
+        this._persist();
+      }
       this.updateAutoOpen();
     });
 
@@ -456,12 +481,14 @@ TZ.panel = {
     });
     const pcsOver = this._el("pcsOver");
     if (pcsOver) pcsOver.value = "";
+    const priceAtMost = this._el("priceAtMost");
+    if (priceAtMost) priceAtMost.value = "";
     this._readForm();
     this.saveNow(true);
   },
 
   _clearAutoFields: function () {
-    ["autoDaily", "autoMonthly", "autoRating", "autoReviews", "autoTemuSold", "autoListed", "autoPcsOver"].forEach((name) => {
+    ["autoDaily", "autoMonthly", "autoRating", "autoReviews", "autoTemuSold", "autoListed", "autoPcsOver", "autoPriceAtMost"].forEach((name) => {
       const el = this._el(name);
       if (el) el.value = "";
     });
@@ -496,6 +523,10 @@ TZ.panel = {
     if (autoPcsOver) s.autoOpen.pcsOver = TZ.emptyNum(autoPcsOver.value);
     const pcsOver = this._el("pcsOver");
     if (pcsOver) s.pcsOver = TZ.emptyNum(pcsOver.value);
+    const autoPriceAtMost = this._el("autoPriceAtMost");
+    if (autoPriceAtMost) s.autoOpen.priceAtMost = TZ.emptyNum(autoPriceAtMost.value);
+    const priceAtMost = this._el("priceAtMost");
+    if (priceAtMost) s.priceAtMost = TZ.emptyNum(priceAtMost.value);
 
     const th = s.thresholds;
     this.root.querySelectorAll("[data-th]").forEach((input) => {
@@ -666,6 +697,13 @@ TZ.panel = {
     if (autoPcsOverEl) {
       const aoP = settings.autoOpen && settings.autoOpen.pcsOver;
       autoPcsOverEl.value = aoP == null ? "" : aoP;
+    }
+    const priceAtMostEl = this._el("priceAtMost");
+    if (priceAtMostEl) priceAtMostEl.value = settings.priceAtMost == null ? "" : settings.priceAtMost;
+    const autoPriceAtMostEl = this._el("autoPriceAtMost");
+    if (autoPriceAtMostEl) {
+      const aoPr = settings.autoOpen && settings.autoOpen.priceAtMost;
+      autoPriceAtMostEl.value = aoPr == null ? "" : aoPr;
     }
 
     this.root.querySelectorAll("[data-ex]").forEach((box) => {

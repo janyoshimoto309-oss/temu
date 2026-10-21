@@ -78,6 +78,14 @@ TZ.exclusionReasons = function (parsed, settings) {
       }
       return;
     }
+    if (rule.special === "priceAtMost") {
+      const limit = TZ.emptyNum(settings && settings.priceAtMost);
+      if (limit == null) return;
+      if (parsed.price != null && parsed.price <= limit) {
+        reasons.push("价格 " + parsed.price + " ≤ " + limit);
+      }
+      return;
+    }
     if (!enabled[rule.id]) return;
     if (rule.special === "customBadge") {
       if (

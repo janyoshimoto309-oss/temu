@@ -9,6 +9,7 @@ TZ.observer = {
     this.url = location.href;
     if (this.mo) this.mo.disconnect();
     this.mo = new MutationObserver((mutations) => {
+      if (this._running) return;
       if (!chrome.runtime || !chrome.runtime.id) {
         this.mo.disconnect();
         return;
@@ -30,7 +31,14 @@ TZ.observer = {
       if (relevant) this.schedule();
     });
     this.mo.observe(document.documentElement, { childList: true, subtree: true });
-    window.addEventListener("scroll", () => this.schedule(), { passive: true });
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (TZ.pageScope && TZ.pageScope.refresh() === "detail") return;
+        this.schedule();
+      },
+      { passive: true }
+    );
     window.addEventListener("popstate", () => this.onUrlChange());
     this._wrapHistory();
     setInterval(() => {
@@ -42,9 +50,16 @@ TZ.observer = {
   schedule: function () {
     if (this.timer) clearTimeout(this.timer);
     this.timer = setTimeout(() => {
-      if (TZ.filter && TZ.filter.settings) TZ.filter.run(TZ.filter.settings);
-      if (TZ.detailRecs) TZ.detailRecs.run(TZ.filter.settings);
-      if (TZ.priceBadge) TZ.priceBadge.run();
+      if (this._running) return;
+      this._running = true;
+      try {
+        const kind = TZ.pageScope ? TZ.pageScope.refresh() : "browse";
+        if (kind !== "detail" && TZ.filter && TZ.filter.settings) TZ.filter.run(TZ.filter.settings);
+        if (TZ.detailRecs) TZ.detailRecs.run(TZ.filter && TZ.filter.settings);
+        if (TZ.priceBadge) TZ.priceBadge.run();
+      } finally {
+        this._running = false;
+      }
     }, 280);
   },
 

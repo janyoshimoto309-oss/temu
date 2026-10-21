@@ -165,7 +165,11 @@ TZ.autoOpen = {
       listedWithinValue: ao.listedWithinValue,
       listedWithinUnit: ao.listedWithinUnit
     });
-    const excluded = TZ.exclusionReasons(parsed, { exclusions: ao.exclusions, pcsOver: ao.pcsOver });
+    const excluded = TZ.exclusionReasons(parsed, {
+      exclusions: ao.exclusions,
+      pcsOver: ao.pcsOver,
+      priceAtMost: ao.priceAtMost
+    });
     return !reasons.length && !excluded.length;
   },
 

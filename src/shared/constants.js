@@ -89,6 +89,11 @@ TZ.RULE_EXCLUSIONS = [
     special: "pcs"
   },
   {
+    id: "priceAtMost",
+    label: "价格 ≤",
+    special: "priceAtMost"
+  },
+  {
     id: "knife",
     label: "刀",
     category: ["刀", "刀具", "刀具刀"],
@@ -143,6 +148,36 @@ TZ.RULE_EXCLUSIONS = [
       "earbuds",
       "headphone"
     ]
+  },
+  {
+    id: "liquid",
+    label: "液体",
+    category: ["液体", "液态", "乳液", "水性", "油类", "喷雾", "凝胶", "精华"],
+    title: [
+      "液体",
+      "液态",
+      "乳液",
+      "精华液",
+      "精油",
+      "洗衣液",
+      "漱口水",
+      "洗手液",
+      "沐浴露",
+      "洗发水",
+      "喷雾",
+      "凝胶",
+      "化妆水",
+      "爽肤水",
+      "眼药水",
+      "liquid",
+      "lotion",
+      "serum",
+      "essential oil",
+      "spray",
+      "gel",
+      "toner",
+      "shampoo"
+    ]
   }
 ];
 
@@ -162,6 +197,7 @@ TZ.DEFAULT_SETTINGS = {
   autoFolded: false,
   panelLeft: null,
   panelTop: null,
+  panelSkin: "violet",
   thresholds: {
     dailySalesMin: null,
     weeklySalesMin: null,
@@ -184,6 +220,7 @@ TZ.DEFAULT_SETTINGS = {
   },
   exclusions: {},
   pcsOver: null,
+  priceAtMost: null,
   aiExclusions: {},
   ai: {
     enabled: false,
@@ -201,6 +238,7 @@ TZ.DEFAULT_SETTINGS = {
     listedWithinValue: null,
     listedWithinUnit: "month",
     pcsOver: null,
+    priceAtMost: null,
     exclusions: {}
   },
   numericPresets: {
