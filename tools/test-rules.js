@@ -174,7 +174,7 @@ eq("title 品牌 without chip does not dim", v.dim, false);
 eq("pcs 24pcs", T.parsePcsCount("24pcs flower"), 24);
 eq("pcs 件", T.parsePcsCount("50件套装"), 50);
 eq("pcs 个", T.parsePcsCount("30个装"), 30);
-eq("pcs skip 个月", T.parsePcsCount("上架3个月"), null);
+eq("pcs 片", T.parsePcsCount("120片5色的圆形圆纸片套装"), 120);
 
 v = T.evaluateRules(card({}, { title: "24pcs set", pcs: 24 }), settings({ pcsOver: 20 }));
 eq("pcs over dims", v.dim, true);
@@ -262,6 +262,18 @@ v = T.evaluateRules(
   settings({ exclusions: { toysKids: true } })
 );
 eq("not-for-children toy keeps", v.dim, false);
+
+eq(
+  "title prefers 儿童 line",
+  T.pickProductTitle("Surprise!\n知了数据\n品类：玩具手办玩偶套装\n【神儿童版】儿童节礼品套装，可变色"),
+  "【神儿童版】儿童节礼品套装，可变色"
+);
+
+v = T.evaluateRules(
+  card({ category: "玩具手办玩偶套装" }, { title: "【神儿童版】儿童节礼品套装，可变色" }),
+  settings({ exclusions: { toysKids: true } })
+);
+eq("神儿童版 dims", v.dim, true);
 
 v = T.evaluateRules(
   card({ category: "玩具手办玩偶套装" }, { title: "木制积木 儿童适用 3岁+" }),

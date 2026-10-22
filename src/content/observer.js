@@ -20,7 +20,8 @@ TZ.observer = {
         for (const node of m.addedNodes) {
           if (node.nodeType !== 1) continue;
           if (node.id === TZ.HOST_ID || (node.closest && node.closest("#" + TZ.HOST_ID))) continue;
-          if (node.classList && node.classList.contains(TZ.HALF_CLASS)) continue;
+          if (node.classList && (node.classList.contains(TZ.HALF_CLASS) || node.classList.contains("tz-sku-split"))) continue;
+          if (node.closest && node.closest(".tz-sku-split")) continue;
           const tag = node.tagName;
           if (tag === "SCRIPT" || tag === "STYLE" || tag === "LINK" || tag === "META") continue;
           relevant = true;

@@ -335,6 +335,28 @@ TZ.parseTemuSold = function (text) {
   return n;
 };
 
+TZ.pickProductTitle = function (text) {
+  const lines = String(text || "")
+    .split(/\n+/)
+    .map(function (s) {
+      return s.replace(/\s+/g, " ").trim();
+    })
+    .filter(Boolean);
+  const skip = /知了|销量|品类|店铺|上架|评分|评论|已售|总销售|关注数|产品数|开店|Store rating/i;
+  let best = "";
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.length < 6 || /^\$/.test(line) || skip.test(line)) continue;
+    if (/[\u4e00-\u9fff]/.test(line) && line.length > best.length) best = line;
+  }
+  if (best) return best;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.length > 8 && !/^\$/.test(line) && !skip.test(line)) return line;
+  }
+  return "";
+};
+
 TZ.parsePcsCount = function (title) {
   if (!title) return null;
   const s = TZ.normalizeDigits(title);
@@ -344,6 +366,8 @@ TZ.parsePcsCount = function (title) {
   if (jian) return parseInt(jian[1], 10);
   const ge = s.match(/(\d+)\s*个(?!月)/);
   if (ge) return parseInt(ge[1], 10);
+  const pian = s.match(/(\d+)\s*片/);
+  if (pian) return parseInt(pian[1], 10);
   return null;
 };
 
@@ -395,26 +419,19 @@ TZ.parseCard = function (card, zhiliaoEl) {
     }
   }
 
-  let title = "";
+  let titleBlob = "";
   const headings = card.querySelectorAll("h1, h2, h3, h4");
   for (const h of headings) {
     if (zhiliaoEl && zhiliaoEl.contains(h)) continue;
-    const t = (h.innerText || "").trim();
-    if (t && t.length >= 4 && !t.includes("知了数据")) {
-      title = t.split("\n")[0].trim();
-      break;
-    }
+    titleBlob += "\n" + (h.innerText || "");
   }
-  if (!title) {
-    for (const a of anchors) {
-      if (zhiliaoEl && zhiliaoEl.contains(a)) continue;
-      const t = (a.innerText || a.getAttribute("title") || a.getAttribute("aria-label") || "").trim();
-      if (t && t.length >= 6 && !t.includes("知了数据") && !/^\$/.test(t) && !t.includes("已售")) {
-        title = t.split("\n")[0].trim();
-        if (title.length > 8) break;
-      }
-    }
+  for (const a of anchors) {
+    if (zhiliaoEl && zhiliaoEl.contains(a)) continue;
+    titleBlob += "\n" + (a.innerText || "");
+    titleBlob += "\n" + (a.getAttribute("title") || "");
+    titleBlob += "\n" + (a.getAttribute("aria-label") || "");
   }
+  let title = TZ.pickProductTitle(titleBlob);
 
   let imageUrl = "";
   const imgs = card.querySelectorAll("img");

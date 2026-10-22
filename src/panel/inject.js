@@ -239,7 +239,7 @@ TZ.panel = {
               <button class="tz-btn ghost" type="button" data-act="checkAllEx">全选</button>
             </div>
             <div class="tz-field">
-              <label>套装件数 &gt;（个 / 件 / pcs）</label>
+              <label>套装件数 &gt;（个 / 件 / 片 / pcs）</label>
               <input type="number" min="0" data-el="pcsOver" placeholder="空=不启用">
             </div>
             <div class="tz-field">
@@ -303,7 +303,7 @@ TZ.panel = {
             </div>
             <div class="tz-muted">勾选后命中则不点，规则与上面筛选相同，不变灰。「保存规则」会一起记住。</div>
             <div class="tz-field">
-              <label>套装件数 &gt;（个 / 件 / pcs）</label>
+              <label>套装件数 &gt;（个 / 件 / 片 / pcs）</label>
               <input type="number" min="0" data-el="autoPcsOver" placeholder="空=不限制">
             </div>
             <div class="tz-field">

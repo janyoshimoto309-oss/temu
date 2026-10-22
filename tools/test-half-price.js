@@ -36,5 +36,20 @@ for (const [s, e] of cases) {
     fail += 1;
   }
 }
+function halfPerQty(halfText, qty) {
+  const h = parseFloat(halfText);
+  const q = Number(qty);
+  if (!Number.isFinite(h) || !Number.isFinite(q) || q <= 0) return "";
+  const cents = Math.round(h * 100);
+  return (Math.round(cents / q) / 100).toFixed(2);
+}
+if (halfPerQty("1.97", 2) !== "0.99") {
+  console.log("FAIL half/qty", halfPerQty("1.97", 2));
+  fail += 1;
+}
+if (halfPerQty("1.97", "") !== "" || halfPerQty("1.97", 0) !== "") {
+  console.log("FAIL empty qty");
+  fail += 1;
+}
 console.log(fail === 0 ? "HALF_OK" : "HALF_FAIL " + fail);
 process.exit(fail === 0 ? 0 : 1);

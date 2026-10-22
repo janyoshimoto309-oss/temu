@@ -13,6 +13,7 @@ TZ.priceBadge = {
     }
     if (kind === "detail") {
       this._markDetail();
+      this._mountSplit(this._detailHalf);
       this._markListFromRecords(false);
       return;
     }
@@ -37,8 +38,13 @@ TZ.priceBadge = {
   _isOurs: function (el) {
     if (!el) return true;
     if (el.id === TZ.HOST_ID) return true;
-    if (el.classList && el.classList.contains(TZ.HALF_CLASS)) return true;
-    if (el.closest && (el.closest("#" + TZ.HOST_ID) || el.closest("." + TZ.HALF_CLASS))) return true;
+    if (el.classList && (el.classList.contains(TZ.HALF_CLASS) || el.classList.contains("tz-sku-split"))) return true;
+    if (
+      el.closest &&
+      (el.closest("#" + TZ.HOST_ID) || el.closest("." + TZ.HALF_CLASS) || el.closest(".tz-sku-split"))
+    ) {
+      return true;
+    }
     return false;
   },
 
@@ -140,9 +146,8 @@ TZ.priceBadge = {
     this._placeAfter(found.el, badge);
   },
 
-  _detailScope: function () {
+  _findCartButton: function () {
     const nodes = document.querySelectorAll("button, div, span");
-    let cart = null;
     for (let i = 0; i < nodes.length; i++) {
       const el = nodes[i];
       if (this._isOurs(el)) continue;
@@ -150,10 +155,14 @@ TZ.priceBadge = {
       const t = (el.innerText || "").replace(/\s+/g, "");
       if (!t || t.length > 24) continue;
       if (t.indexOf("加入购物车") === 0 || t.indexOf("立即加购") === 0 || t.indexOf("Addtocart") === 0) {
-        cart = el;
-        break;
+        return el;
       }
     }
+    return null;
+  },
+
+  _detailScope: function () {
+    const cart = this._findCartButton();
     if (!cart) return document.body;
     let p = cart.parentElement;
     for (let i = 0; i < 14 && p && p !== document.body; i++) {
@@ -170,11 +179,13 @@ TZ.priceBadge = {
 
   _markDetail: function () {
     if (!document.body) return;
+    this._detailHalf = "";
     const scope = this._detailScope();
     const found = this._findCurrentPrice(scope) || this._findCurrentPrice(document.body);
     if (!found) return;
     const half = TZ.formatHalfPrice(found.n);
     if (!half) return;
+    this._detailHalf = half;
     let badge = document.querySelector("." + TZ.HALF_CLASS + "--detail");
     if (!badge) {
       badge = document.createElement("span");
@@ -207,6 +218,127 @@ TZ.priceBadge = {
 
   _clearDetail: function () {
     document.querySelectorAll("." + TZ.HALF_CLASS + "--detail").forEach((el) => {
+      if (el.parentNode) el.parentNode.removeChild(el);
+    });
+    this._clearSplit();
+  },
+
+  _buyColumn: function (cart) {
+    let p = cart && cart.parentElement;
+    let best = null;
+    for (let i = 0; i < 18 && p && p !== document.body; i++) {
+      if (TZ.pageScope && TZ.pageScope.isUiChrome && TZ.pageScope.isUiChrome(p)) {
+        p = p.parentElement;
+        continue;
+      }
+      const rect = p.getBoundingClientRect();
+      if (rect.width >= 260 && rect.width <= 980 && rect.height >= 80) best = p;
+      if (rect.width > 980) break;
+      p = p.parentElement;
+    }
+    return best;
+  },
+
+  _findSkuRow: function (scope, cart) {
+    if (!scope || scope === document.body || !scope.querySelectorAll) return null;
+    const cartTop = cart && cart.getBoundingClientRect ? cart.getBoundingClientRect().top : Infinity;
+    let best = null;
+    let bestTop = -Infinity;
+    const nodes = scope.querySelectorAll("div");
+    for (let i = 0; i < nodes.length; i++) {
+      const row = nodes[i];
+      if (this._isOurs(row)) continue;
+      if (cart && (row === cart || row.contains(cart))) continue;
+      const rect = row.getBoundingClientRect();
+      if (rect.width < 140 || rect.height < 24 || rect.height > 160) continue;
+      if (rect.top > cartTop + 8) continue;
+      const kids = row.children;
+      if (!kids || kids.length < 2) continue;
+      let chips = 0;
+      for (let k = 0; k < kids.length; k++) {
+        const child = kids[k];
+        if (child.classList && child.classList.contains("tz-sku-split")) continue;
+        const box = child.getBoundingClientRect();
+        if (box.width >= 20 && box.width <= 360 && box.height >= 18 && box.height <= 120) chips += 1;
+      }
+      if (chips >= 2 && rect.top >= bestTop) {
+        best = row;
+        bestTop = rect.top;
+      }
+    }
+    return best;
+  },
+
+  _ensureSplit: function () {
+    let box = document.querySelector(".tz-sku-split");
+    if (box) return box;
+    box = document.createElement("div");
+    box.className = "tz-sku-split";
+    box.setAttribute(TZ.HALF_ATTR, "split");
+    const stop = function (e) {
+      e.stopPropagation();
+    };
+    box.addEventListener("pointerdown", stop);
+    box.addEventListener("click", stop);
+    box.addEventListener("keydown", stop);
+    const qty = document.createElement("input");
+    qty.type = "number";
+    qty.min = "0";
+    qty.step = "1";
+    qty.className = "tz-sku-split-qty";
+    qty.placeholder = "数量";
+    qty.title = "物品数量";
+    qty.value = this._qty || "";
+    qty.addEventListener("input", () => {
+      this._qty = qty.value;
+      this._fillSplit(this._detailHalf);
+    });
+    const out = document.createElement("input");
+    out.type = "text";
+    out.readOnly = true;
+    out.tabIndex = -1;
+    out.className = "tz-sku-split-out";
+    out.placeholder = "半价/数量";
+    out.title = "半价 ÷ 数量";
+    box.appendChild(qty);
+    box.appendChild(out);
+    return box;
+  },
+
+  _mountSplit: function (halfText) {
+    if (location.href !== this._splitHref) {
+      this._splitHref = location.href;
+      this._qty = "";
+      this._clearSplit();
+    }
+    const cart = this._findCartButton();
+    const column = this._buyColumn(cart) || this._detailScope();
+    const row = this._findSkuRow(column, cart);
+    const anchor = row || cart;
+    if (!anchor || !anchor.parentNode) return;
+    const box = this._ensureSplit();
+    const next = row ? row.nextSibling : cart;
+    if (box.parentNode !== anchor.parentNode || box.nextSibling !== (row ? next : cart)) {
+      anchor.parentNode.insertBefore(box, row ? row.nextSibling : cart);
+    }
+    this._fillSplit(halfText);
+  },
+
+  _fillSplit: function (halfText) {
+    const box = document.querySelector(".tz-sku-split");
+    if (!box) return;
+    const qty = box.querySelector(".tz-sku-split-qty");
+    const out = box.querySelector(".tz-sku-split-out");
+    if (qty && document.activeElement !== qty && qty.value !== (this._qty || "")) qty.value = this._qty || "";
+    const q = TZ.emptyNum ? TZ.emptyNum(qty ? qty.value : this._qty) : null;
+    const h = parseFloat(halfText);
+    const cents = Number.isFinite(h) ? Math.round(h * 100) : NaN;
+    const each = q != null && q > 0 && Number.isFinite(cents) ? Math.round(cents / q) / 100 : NaN;
+    if (out) out.value = Number.isFinite(each) ? each.toFixed(2) : "";
+  },
+
+  _clearSplit: function () {
+    document.querySelectorAll(".tz-sku-split").forEach((el) => {
       if (el.parentNode) el.parentNode.removeChild(el);
     });
   },
